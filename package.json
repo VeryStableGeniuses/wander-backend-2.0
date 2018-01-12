@@ -28,6 +28,8 @@
     "mocha": "mocha test/ --recursive --exit"
   },
   "dependencies": {
+    "@feathersjs/authentication": "^2.1.1",
+    "@feathersjs/authentication-local": "^1.0.4",
     "@feathersjs/authentication-oauth2": "^1.0.3",
     "@feathersjs/configuration": "^1.0.2",
     "@feathersjs/errors": "^3.2.1",
@@ -36,6 +38,7 @@
     "@feathersjs/socketio": "^3.0.2",
     "compression": "^1.7.1",
     "cors": "^2.8.4",
+    "dotenv": "^4.0.0",
     "helmet": "^3.9.0",
     "passport-facebook": "^2.1.1",
     "passport-google-oauth20": "^1.0.0",
