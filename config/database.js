@@ -1,10 +1,24 @@
 require('dotenv').config();
 const Sequelize = require('sequelize');
 
+let pw = '';
+
+if (process.env.PROD) {
+  pw = 'stablegenius';
+}
 const sequelize = new Sequelize('wander', 'root', {
-  host: process.env.PORT,
-  dialect: 'Postgresql',
+  host: '127.0.0.1',
+  dialect: 'postgres',
 });
+
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log('Connection has been established successfully.');
+  })
+  .catch(err => {
+    console.error('Unable to connect to the database:', err);
+  });
 
 const Type = sequelize.define('type', {
   name: Sequelize.STRING,
@@ -25,7 +39,7 @@ const User = sequelize.define('user', {
 });
 
 user_like.belongsTo(User, { foreignKey: 'id_User' });
-User.hasMany(user_like, { foreignKey: 'id_user' });
+User.hasMany(user_like, { foreignKey: 'id_User' });
 
 const Event = sequelize.define('event', {
   location: Sequelize.FLOAT,
@@ -36,7 +50,7 @@ Event.belongsTo(Type, { foreignKey: 'id_Type' });
 Type.hasMany(Event, { foreignKey: 'id_Type' });
 
 const event_schedule = sequelize.define('event_schedule', {
-  dateTime: Sequelize.TIME,
+  dateTime: Sequelize.DATE_TIME,
 });
 
 event_schedule.belongsTo(Event, { foreignKey: 'id_Event' });
