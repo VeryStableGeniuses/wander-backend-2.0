@@ -1,12 +1,10 @@
 {
   "name": "backend",
-  "description": "wander-backend-feathers-server",
+  "description": "wander-backend",
   "version": "0.0.0",
   "homepage": "",
   "main": "src",
-  "keywords": [
-    "feathers"
-  ],
+  "keywords": [],
   "author": {
     "name": "Jessie White",
     "email": "jleveewhite@gmail.com"
@@ -24,31 +22,21 @@
   "scripts": {
     "test": "npm run eslint && npm run mocha",
     "eslint": "eslint src/. test/. --config .eslintrc.json",
-    "start": "node src/",
+    "start": "node src/app.js",
     "mocha": "mocha test/ --recursive --exit"
   },
   "dependencies": {
-    "@feathersjs/authentication": "^2.1.1",
-    "@feathersjs/authentication-local": "^1.0.4",
-    "@feathersjs/authentication-oauth2": "^1.0.3",
-    "@feathersjs/configuration": "^1.0.2",
-    "@feathersjs/errors": "^3.2.1",
-    "@feathersjs/express": "^1.1.2",
-    "@feathersjs/feathers": "^3.0.5",
-    "@feathersjs/socketio": "^3.0.2",
-    "compression": "^1.7.1",
-    "cors": "^2.8.4",
+    "cookie-parser": "^1.4.3",
     "dotenv": "^4.0.0",
-    "feathers-sequelize": "^3.0.0",
-    "helmet": "^3.9.0",
+    "express": "^4.16.2",
+    "morgan": "^1.9.0",
     "passport-facebook": "^2.1.1",
     "passport-google-oauth20": "^1.0.0",
     "pg": "^7.4.1",
     "pg-hstore": "^2.3.2",
     "sequelize": "^4.31.1",
     "sequelize-cli": "^3.2.0",
-    "serve-favicon": "^2.4.5",
-    "winston": "^2.4.0"
+    "serve-favicon": "^2.4.5"
   },
   "devDependencies": {
     "eslint": "^4.15.0",

@@ -27,6 +27,17 @@ module.exports = {
       });
   },
 
+  addType: (type, callback) => {
+    console.log("adding type", type);
+    Type.create(type, { fields: ['name']})
+      .then(type => {
+        callback(null, type);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
   getUsers: callback => {
     User.findAll()
       .then(users => {

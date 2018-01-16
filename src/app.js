@@ -1,52 +1,49 @@
-const path = require('path');
-const favicon = require('serve-favicon');
-const compress = require('compression');
-const cors = require('cors');
-const helmet = require('helmet');
-const logger = require('winston');
-
-const feathers = require('@feathersjs/feathers');
-const configuration = require('@feathersjs/configuration');
-const express = require('@feathersjs/express');
-const socketio = require('@feathersjs/socketio');
-
-
-const middleware = require('./middleware');
-const services = require('./services');
-const appHooks = require('./app.hooks');
-const channels = require('./channels');
-
-const app = express(feathers());
+require('dotenv').config();
+const express = require('express');
+const bodyParser = require('body-parser');
+const app = express();
+const cookieParser = require('cookie-parser');
+const morgan = require('morgan');
+const PORT = process.env.PORT || 3000;
 
 const db = require('../config/db-helpers');
 
-// Load app configuration
-app.configure(configuration());
-// Enable CORS, security, compression, favicon and body parsing
-app.use(cors());
-app.use(helmet());
-app.use(compress());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(favicon(path.join(app.get('public'), 'favicon.ico')));
-// Host the public folder
-app.use('/', express.static(app.get('public')));
+app.use(express.static(`${__dirname}/dist`));
 
-// Set up Plugins and providers
-app.configure(express.rest());
-app.configure(socketio());
+// set morgan to log info about our requests for development
+app.use(morgan('dev'));
 
-// Configure other middleware (see `middleware/index.js`)
-app.configure(middleware);
-// Set up our services (see `services/index.js`)
-app.configure(services);
-// Set up event channels (see channels.js)
-app.configure(channels);
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-// Configure a middleware for 404s and the error handler
-app.use(express.notFound());
-app.use(express.errorHandler({ logger }));
+app.use(cookieParser());
 
-app.hooks(appHooks);
+app.post('/type', (req, res) => {
+  let type = req.body;
+  db.addType(type, (err, type) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(type);
+    }
+  });
+});
 
-module.exports = app;
+app.get('/types', (req, res) => {
+  db.getTypes((err, types) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(types);
+    }
+  });
+});
+
+// route for handling 404 requests(unavailable routes)
+app.use(function (req, res) {
+  res.status(404).send('Sorry can\'t find that!');
+});
+
+app.listen(PORT, () => {
+  console.log(`listening on port ${PORT}`);
+});
