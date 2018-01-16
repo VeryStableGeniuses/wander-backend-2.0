@@ -54,7 +54,13 @@ module.exports = {
       bcrypt.hash(newUser.password, salt, (err, hash) => {
         if (err) throw err;
         newUser.password = hash;
-        newUser.save(callback);
+        User.create(newUser, { fields: ['name', 'password', 'email_address'] })
+          .then(user => {
+            callback(null, user);
+          })
+          .catch(err => {
+            callback(err);
+          });
       });
     });
   },
@@ -202,7 +208,7 @@ module.exports = {
         callback(err);
       });
   },
-  
+
   createSchedule: (schedule, callback) => {
     Schedule.create(schedule, { fields: ['name'] })
       .then(schedule => {

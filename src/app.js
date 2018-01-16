@@ -39,6 +39,38 @@ app.get('/types', (req, res) => {
   });
 });
 
+app.post('/user', (req, res) => {
+  let user = req.body;
+  db.createUser(user, (err, newUser) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(newUser.dataValues);
+    }
+  });
+});
+
+app.get('/users', (req, res) => {
+  db.getUsers((err, users) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(users);
+    }
+  });
+});
+
+app.post('/schedule', (req, res) => {
+  let schedule = req.body;
+  db.createSchedule(schedule, (err, newSchedule) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(newSchedule.dataValues);
+    }
+  });
+});
+
 // route for handling 404 requests(unavailable routes)
 app.use(function (req, res) {
   res.status(404).send('Sorry can\'t find that!');
