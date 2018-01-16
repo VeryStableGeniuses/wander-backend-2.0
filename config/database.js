@@ -14,8 +14,8 @@ if (process.env.PROD) {
   pw = 'stablegenius';
 }
 const sequelize = new Sequelize('wander', 'wander', pw, {
-  host: '127.0.0.1',
-  dialect: 'postgres',
+  host: 'wander-app.c2xrfwg5wokn.us-east-2.rds.amazonaws.com',
+  dialect: 'postgres'
 });
 
 // connect to db
