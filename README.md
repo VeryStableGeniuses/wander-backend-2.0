@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # backend
 
 > wander-backend-feathers-server
@@ -55,3 +56,6 @@ __0.1.0__
 Copyright (c) 2016
 
 Licensed under the [MIT license](LICENSE).
+=======
+# wander-backend-2.0
+>>>>>>> 08537914094c36854a9dfdbbb35c2eab0862750d
