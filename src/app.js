@@ -18,6 +18,8 @@ const channels = require('./channels');
 
 const app = express(feathers());
 
+const db = require('../config/db-helpers');
+
 // Load app configuration
 app.configure(configuration());
 // Enable CORS, security, compression, favicon and body parsing

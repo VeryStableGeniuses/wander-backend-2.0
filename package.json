@@ -39,6 +39,7 @@
     "compression": "^1.7.1",
     "cors": "^2.8.4",
     "dotenv": "^4.0.0",
+    "feathers-sequelize": "^3.0.0",
     "helmet": "^3.9.0",
     "passport-facebook": "^2.1.1",
     "passport-google-oauth20": "^1.0.0",
