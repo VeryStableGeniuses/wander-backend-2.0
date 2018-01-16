@@ -8,6 +8,17 @@
 require('dotenv').config();
 const Sequelize = require('sequelize');
 
+<<<<<<< HEAD
+let pw = 'stablegenius';
+
+if (process.env.PROD) {
+  pw = 'stablegenius';
+}
+const sequelize = new Sequelize('wander', 'wander', pw, {
+  host: 'wander-app.c2xrfwg5wokn.us-east-2.rds.amazonaws.com',
+  dialect: 'postgres'
+});
+=======
 // let pw = 'stablegenius';
 
 // if (process.env.PROD) {
@@ -30,6 +41,7 @@ const sequelize = new Sequelize('wander', 'wander', 'stablegenius', {
   pool: { maxConnections: 5, maxIdleTime: 30},
   language: 'en'
 })
+>>>>>>> e4a8bc850fa9f947754d9b7d97c37588d58008f7
 
 // connect to db
 sequelize
