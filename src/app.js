@@ -40,15 +40,28 @@ app.get('/types', (req, res) => {
 });
 
 app.post('/user', (req, res) => {
-  let user = req.body;
+  const user = req.body;
   db.createUser(user, (err, newUser) => {
     if (err) {
-      console.error(err);
+      res.status(401).send(err);
     } else {
       res.send(newUser.dataValues);
+      res.status(201).send('signup successful!');
     }
   });
 });
+
+// addUser: function (req, res) {
+//   const user = req.body;
+//   db.addUser(user, (err, newUser) => {
+//     if (err) {
+//       res.status(401).send(err);
+//     } else {
+//       req.session.user = newUser.dataValues;
+//       res.status(201).send("signup successful!");
+//     }
+//   });
+// },
 
 app.get('/users', (req, res) => {
   db.getUsers((err, users) => {
@@ -56,6 +69,28 @@ app.get('/users', (req, res) => {
       console.error(err);
     } else {
       res.send(users);
+    }
+  });
+});
+
+app.get('/user_likes', (req, res) => {
+  let userId = req.params.uid;
+  db.getUserLikes(userId, (err, likes) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(likes);
+    }
+  });
+});
+
+app.post('/event', (req, res) => {
+  let event = req.body;
+  db.addEvent(event, (err, newEvent) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(newEvent.dataValues);
     }
   });
 });
@@ -71,18 +106,8 @@ app.post('/schedule', (req, res) => {
   });
 });
 
-app.get('/user_likes', (req, res) => {
-  db.getUserLikes((err, userLikes) => {
-    if (err) {
-      console.error(err);
-    } else {
-      res.send(userLikes);
-    }
-  });
-});
-
 // route for handling 404 requests(unavailable routes)
-app.use(function (req, res) {
+app.use(function(req, res) {
   res.status(404).send('Sorry can\'t find that!');
 });
 

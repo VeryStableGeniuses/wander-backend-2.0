@@ -1,7 +1,6 @@
 /**
  * Database configuration file
  * Set up schemas and table associations.
- * To connect to Postico, use the password below with the cloud_sql_proxy running
  */
 
 

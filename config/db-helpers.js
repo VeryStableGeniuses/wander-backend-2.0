@@ -110,10 +110,17 @@ module.exports = {
       });
   },
 
-  getUserLikes: (userLike, callback) => {
-    UserLike.findById(userLike.id)
-      .then(userLike => {
-        callback(null, userLike);
+  getUserLikes: (userId, callback) => {
+    User.findById(userId)
+      .then(user => {
+        if (user) {
+          return user.getUserLikes();
+        } else {
+          console.log('user is not defined');
+        }
+      })
+      .then(userLikes => {
+        callback(null, userLikes);
       })
       .catch(err => {
         callback(err);
@@ -147,6 +154,16 @@ module.exports = {
 
   getEventById: (event, callback) => {
     Event.findById(event.id)
+      .then(event => {
+        callback(null, event);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  addEvent: (event, callback) => {
+    Event.create(event, { fields: ['id_type', 'location', 'name'] })
       .then(event => {
         callback(null, event);
       })
