@@ -124,9 +124,9 @@ const fillDay = (day, rankedList, interests, currentDay, restaurants) => {
 };
 
 // Here's where the magic happens
-const scheduleBuilder = (startDate, endDate, google, restaurantData, user, cb) => {
+const scheduleBuilder = (startDate, endDate, google, restaurantData, interests) => {
   // Get the user's interests and dislikes, store them in arrays
-  const interests = ['museum', 'park', 'point_of_interest', 'music'];
+  
   const dislikes = ['aquarium', 'casino'];
   console.log('google', google);
 
@@ -157,10 +157,10 @@ const scheduleBuilder = (startDate, endDate, google, restaurantData, user, cb) =
     fillDay(schedule[day], sortedAndRated, interests, currentDay, restaurantData.restaurants);
     currentDay = currentDay < 7 ? currentDay + 1 : 0;
   });
-  cb(schedule);
+  return schedule;
 };
 
-const getSchedule = (startDate, endDate, location) => {
+const getSchedule = (startDate, endDate, location, interests, cb) => {
   const query = location.split(' ').join('+');
   const config = {
     headers: {
@@ -171,7 +171,7 @@ const getSchedule = (startDate, endDate, location) => {
     axios.get(`https://maps.googleapis.com/maps/api/place/textsearch/json?query=${query}+point+of+interest&language=en&key=${keys.googlePlacesAPI}`),
     axios.get(`https://developers.zomato.com/api/v2.1/search?q=${query}&sort=rating`, config),
   ])
-    .then(([restaurants, googlePlaces]) => scheduleBuilder(startDate, endDate, restaurants.data, googlePlaces.data, 'user', (schedule) => console.log(schedule)))
+    .then(([restaurants, googlePlaces]) => cb(scheduleBuilder(startDate, endDate, restaurants.data, googlePlaces.data, interests)))
     .catch(err => console.error(err));
 };
 
@@ -179,6 +179,9 @@ const getSchedule = (startDate, endDate, location) => {
 const start = new Date('February 10, 2018 00:00:00');
 const end = new Date('Febrauary 13, 2018 00:00:00');
 const query = 'New Orleans';
+const interests = ['museum', 'park', 'point_of_interest', 'music'];
 // console.log(scheduleBuilder(one, two));
+getSchedule(start, end, query, interests, (schedule) => console.log(schedule));
 
-module.exports.getSchedule = getSchedule(start, end, query);
+module.exports.getSchedule = getSchedule;
+
