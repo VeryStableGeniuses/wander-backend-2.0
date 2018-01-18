@@ -180,8 +180,8 @@ const start = new Date('February 10, 2018 00:00:00');
 const end = new Date('Febrauary 13, 2018 00:00:00');
 const query = 'New Orleans';
 const interests = ['museum', 'park', 'point_of_interest', 'music'];
-// console.log(scheduleBuilder(one, two));
-getSchedule(start, end, query, interests, (schedule) => console.log(schedule));
+
+// getSchedule(start, end, query, interests, (schedule) => console.log(schedule));
 
 module.exports.getSchedule = getSchedule;
 
