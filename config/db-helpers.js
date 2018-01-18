@@ -110,11 +110,8 @@ module.exports = {
       });
   },
 
-  getUserLikes: (user, callback) => {
-    User.findById(user.id)
-      .then(user => {
-        return user.getUserLikes();
-      })
+  getUserLikes: (userLike, callback) => {
+    UserLike.findById(userLike.id)
       .then(userLike => {
         callback(null, userLike);
       })

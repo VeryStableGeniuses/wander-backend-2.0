@@ -71,6 +71,16 @@ app.post('/schedule', (req, res) => {
   });
 });
 
+app.get('/user_likes', (req, res) => {
+  db.getUserLikes((err, userLikes) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(userLikes);
+    }
+  });
+});
+
 // route for handling 404 requests(unavailable routes)
 app.use(function (req, res) {
   res.status(404).send('Sorry can\'t find that!');
