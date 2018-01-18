@@ -2,14 +2,18 @@
   "name": "backend",
   "description": "wander-backend",
   "version": "0.0.0",
-  "homepage": "",
+  "repository": "https://github.com/verystablegeniuses/wander-backend-2.0",
+  "homepage": "https://github.com/eddiesmithjr/wander-backend-2.0",
   "main": "src",
   "keywords": [],
   "author": {
     "name": "Jessie White",
     "email": "jleveewhite@gmail.com"
   },
-  "contributors": [],
+  "contributors": [
+    "Eddie Smith, Jr"
+  ],
+  "license": "MIT",
   "bugs": {},
   "directories": {
     "lib": "src",
@@ -26,14 +30,17 @@
     "mocha": "mocha test/ --recursive --exit"
   },
   "dependencies": {
-    "bcrypt": "^1.0.3",
+    "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.18.2",
     "cookie-parser": "^1.4.3",
     "dotenv": "^4.0.0",
     "express": "^4.16.2",
     "morgan": "^1.9.0",
+    "passport": "^0.4.0",
     "passport-facebook": "^2.1.1",
     "passport-google-oauth20": "^1.0.0",
+    "passport-jwt": "^3.0.1",
+    "passport-local": "^1.0.0",
     "pg": "^7.4.1",
     "pg-hstore": "^2.3.2",
     "sequelize": "^4.31.1",

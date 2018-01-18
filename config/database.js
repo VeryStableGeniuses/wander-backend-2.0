@@ -4,31 +4,10 @@
  * To connect to Postico, use the password below with the cloud_sql_proxy running
  */
 
-
 require('dotenv').config();
 const Sequelize = require('sequelize');
 
-<<<<<<< HEAD
-let pw = 'stablegenius';
-
-if (process.env.PROD) {
-  pw = 'stablegenius';
-}
-const sequelize = new Sequelize('wander', 'wander', pw, {
-  host: 'wander-app.c2xrfwg5wokn.us-east-2.rds.amazonaws.com',
-  dialect: 'postgres'
-});
-=======
-// let pw = 'stablegenius';
-
-// if (process.env.PROD) {
-//   pw = 'stablegenius';
-// }
-// const sequelize = new Sequelize('wander', 'wander', pw, {
-//   host: 'wander-app.c2xrfwg5wokn.us-east-2.rds.amazonaws.com',
-//   dialect: 'postgres',
-// });
-
+const pw = 'stablegenius';
 const sequelize = new Sequelize('wander', 'wander', 'stablegenius', {
   host: 'wander-app.c2xrfwg5wokn.us-east-2.rds.amazonaws.com',
   port: 5432,
@@ -41,7 +20,6 @@ const sequelize = new Sequelize('wander', 'wander', 'stablegenius', {
   pool: { maxConnections: 5, maxIdleTime: 30},
   language: 'en'
 })
->>>>>>> e4a8bc850fa9f947754d9b7d97c37588d58008f7
 
 // connect to db
 sequelize
@@ -122,7 +100,7 @@ const Photo = sequelize.define('photo', {
 Photo.sync();
 
 Photo.belongsTo(User, { foreignKey: 'id_user' });
-User.hasMany(Photo, { foreignKey: 'id_user'});
+User.hasMany(Photo, { foreignKey: 'id_user' });
 
 
 // define Hometown
@@ -138,11 +116,11 @@ const UserHometown = sequelize.define('user_hometown', {
 
 UserHometown.sync();
 
-UserHometown.belongsTo(Hometown, { foreignKey: 'user_hometown'});
-Hometown.hasMany(UserHometown, { foreignKey: 'user_hometown'});
+UserHometown.belongsTo(Hometown, { foreignKey: 'user_hometown' });
+Hometown.hasMany(UserHometown, { foreignKey: 'user_hometown' });
 
 UserHometown.belongsTo(User, { foreignKey: 'id_user' });
-User.hasOne(UserHometown, { foreignKey: 'id_user'});
+User.hasOne(UserHometown, { foreignKey: 'id_user' });
 
 module.exports = {
   Type,
@@ -154,4 +132,5 @@ module.exports = {
   Photo,
   Hometown,
   UserHometown,
+  pw
 };
