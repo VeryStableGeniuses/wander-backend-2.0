@@ -79,7 +79,7 @@ module.exports = {
   getuserByEmail: (email, callback) => {
     User.findOne({email: email}, callback);
   },
-
+    
   updateUser: (user, callback) => {
     User.findById(user.id)
       .then(found => {
@@ -206,6 +206,62 @@ module.exports = {
         callback(err);
       });
   },
+  
+  createSchedule: (schedule, callback) => {
+    Schedule.create(schedule, { fields: ['name'] })
+      .then(schedule => {
+        callback(null, schedule);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  // addType: (type, callback) => {
+  //   console.log('adding type', type);
+  //   Type.create(type, { fields: ['name'] })
+  //     .then(type => {
+  //       callback(null, type);
+  //     })
+  //     .catch(err => {
+  //       callback(err);
+  //     });
+  // },
+
+  getScheduleById: (schedule, callback) => {
+    Schedule.findById(schedule.id)
+      .then(schedule => {
+        callback(null, schedule);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  // getUserById: (user, callback) => {
+  //   User.findById(user.id)
+  //     .then(user => {
+  //       callback(null, user);
+  //     })
+  //     .catch(err => {
+  //       callback(err);
+  //     });
+  // },
+
+  // updateUser: (user, callback) => {
+  //   User.findById(user.id)
+  //     .then(found => {
+  //       return found
+  //         .update(user, { fields: ['username', 'password', 'email_address'] })
+  //         .save();
+  //     })
+  //     .then(updatedUser => {
+  //       callback(null, updatedUser);
+  //     })
+  //     .catch(err => {
+  //       callback(err);
+  //     });
+  // },
 
   createSchedule: (schedule, callback) => {
     Schedule.create(schedule, { fields: ['name'] })
