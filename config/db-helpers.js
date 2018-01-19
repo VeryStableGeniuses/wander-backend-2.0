@@ -233,17 +233,6 @@ module.exports = {
       });
   },
 
-  // addType: (type, callback) => {
-  //   console.log('adding type', type);
-  //   Type.create(type, { fields: ['name'] })
-  //     .then(type => {
-  //       callback(null, type);
-  //     })
-  //     .catch(err => {
-  //       callback(err);
-  //     });
-  // },
-
   getScheduleById: (schedule, callback) => {
     Schedule.findById(schedule.id)
       .then(schedule => {
@@ -253,31 +242,6 @@ module.exports = {
         callback(err);
       });
   },
-
-  // getUserById: (user, callback) => {
-  //   User.findById(user.id)
-  //     .then(user => {
-  //       callback(null, user);
-  //     })
-  //     .catch(err => {
-  //       callback(err);
-  //     });
-  // },
-
-  // updateUser: (user, callback) => {
-  //   User.findById(user.id)
-  //     .then(found => {
-  //       return found
-  //         .update(user, { fields: ['username', 'password', 'email_address'] })
-  //         .save();
-  //     })
-  //     .then(updatedUser => {
-  //       callback(null, updatedUser);
-  //     })
-  //     .catch(err => {
-  //       callback(err);
-  //     });
-  // },
 
   getEventSchedule: (event, callback) => {
     Event.findById(event.id)
