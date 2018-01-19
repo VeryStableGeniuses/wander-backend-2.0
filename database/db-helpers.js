@@ -5,6 +5,9 @@
 
 const bcrypt = require('bcrypt-nodejs');
 
+const sequelize = require('./database');
+require('./associations');
+
 const {
   Type,
   User,
@@ -15,7 +18,7 @@ const {
   Photo,
   Hometown,
   UserHometown
-} = require('./database');
+} = require('./models/exports');
 
 module.exports = {
   getTypes: callback => {
@@ -29,7 +32,6 @@ module.exports = {
   },
 
   addType: (type, callback) => {
-    console.log('adding type', type);
     Type.create(type, { fields: ['name'] })
       .then(type => {
         callback(null, type);
@@ -54,7 +56,13 @@ module.exports = {
       bcrypt.hash(newUser.password, salt, null, (err, hash) => {
         if (err) throw err;
         newUser.password = hash;
-        newUser.save(callback);
+        User.create(newUser, { fields: ['name', 'password', 'email_address'] })
+          .then(user => {
+            callback(null, user);
+          })
+          .catch(err => {
+            callback(err);
+          });
       });
     });
   },
@@ -77,9 +85,9 @@ module.exports = {
   },
 
   getuserByEmail: (email, callback) => {
-    User.findOne({email: email}, callback);
+    User.findOne({ email: email }, callback);
   },
-    
+
   updateUser: (user, callback) => {
     User.findById(user.id)
       .then(found => {
@@ -108,11 +116,19 @@ module.exports = {
       });
   },
 
-  getUserLikes: (user, callback) => {
-    User.findById(user.id)
-      .then(user => {
-        return user.getUserLikes();
+  getUserLikes: (userId, callback) => {
+    UserLike.findAll({ where: { id_user: userId } })
+      .then(userLikes => {
+        callback(null, userLikes);
       })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  addUserLike: (userLike, callback) => {
+    console.log('user like', userLike);
+    UserLike.create(userLike, { fields: ['id_type', 'id_user', 'like'] })
       .then(userLike => {
         callback(null, userLike);
       })
@@ -125,7 +141,7 @@ module.exports = {
     UserLike.findById(userLike.id)
       .then(found => {
         return found
-          .update(userLike, { fields: ['id_type', 'id_user', 'like/dislike'] })
+          .update(userLike, { fields: ['id_type', 'id_user', 'like'] })
           .save();
       })
       .then(updatedUserLike => {
@@ -148,6 +164,16 @@ module.exports = {
 
   getEventById: (event, callback) => {
     Event.findById(event.id)
+      .then(event => {
+        callback(null, event);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  addEvent: (event, callback) => {
+    Event.create(event, { fields: ['id_type', 'location', 'name'] })
       .then(event => {
         callback(null, event);
       })
@@ -206,62 +232,6 @@ module.exports = {
         callback(err);
       });
   },
-  
-  createSchedule: (schedule, callback) => {
-    Schedule.create(schedule, { fields: ['name'] })
-      .then(schedule => {
-        callback(null, schedule);
-      })
-      .catch(err => {
-        callback(err);
-      });
-  },
-
-  // addType: (type, callback) => {
-  //   console.log('adding type', type);
-  //   Type.create(type, { fields: ['name'] })
-  //     .then(type => {
-  //       callback(null, type);
-  //     })
-  //     .catch(err => {
-  //       callback(err);
-  //     });
-  // },
-
-  getScheduleById: (schedule, callback) => {
-    Schedule.findById(schedule.id)
-      .then(schedule => {
-        callback(null, schedule);
-      })
-      .catch(err => {
-        callback(err);
-      });
-  },
-
-  // getUserById: (user, callback) => {
-  //   User.findById(user.id)
-  //     .then(user => {
-  //       callback(null, user);
-  //     })
-  //     .catch(err => {
-  //       callback(err);
-  //     });
-  // },
-
-  // updateUser: (user, callback) => {
-  //   User.findById(user.id)
-  //     .then(found => {
-  //       return found
-  //         .update(user, { fields: ['username', 'password', 'email_address'] })
-  //         .save();
-  //     })
-  //     .then(updatedUser => {
-  //       callback(null, updatedUser);
-  //     })
-  //     .catch(err => {
-  //       callback(err);
-  //     });
-  // },
 
   createSchedule: (schedule, callback) => {
     Schedule.create(schedule, { fields: ['name'] })
@@ -273,17 +243,6 @@ module.exports = {
       });
   },
 
-  // addType: (type, callback) => {
-  //   console.log('adding type', type);
-  //   Type.create(type, { fields: ['name'] })
-  //     .then(type => {
-  //       callback(null, type);
-  //     })
-  //     .catch(err => {
-  //       callback(err);
-  //     });
-  // },
-
   getScheduleById: (schedule, callback) => {
     Schedule.findById(schedule.id)
       .then(schedule => {
@@ -293,31 +252,6 @@ module.exports = {
         callback(err);
       });
   },
-
-  // getUserById: (user, callback) => {
-  //   User.findById(user.id)
-  //     .then(user => {
-  //       callback(null, user);
-  //     })
-  //     .catch(err => {
-  //       callback(err);
-  //     });
-  // },
-
-  // updateUser: (user, callback) => {
-  //   User.findById(user.id)
-  //     .then(found => {
-  //       return found
-  //         .update(user, { fields: ['username', 'password', 'email_address'] })
-  //         .save();
-  //     })
-  //     .then(updatedUser => {
-  //       callback(null, updatedUser);
-  //     })
-  //     .catch(err => {
-  //       callback(err);
-  //     });
-  // },
 
   getEventSchedule: (event, callback) => {
     Event.findById(event.id)
@@ -388,6 +322,16 @@ module.exports = {
       });
   },
 
+  addPhoto: (photo, callback) => {
+    Photo.create(photo, { fields: ['url'] })
+      .then(photo => {
+        callback(null, photo);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
   updatePhoto: (photo, callback) => {
     Photo.findById(photo.id)
       .then(found => {
@@ -447,9 +391,3 @@ module.exports = {
       });
   }
 };
-
-/** TODO:
- * get each row from a table by id (get user by id, etc.)
- * CRUD for each table (delete user, update user by id, get user by id, etc.)
- *
- */
