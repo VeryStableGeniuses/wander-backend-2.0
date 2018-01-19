@@ -22,7 +22,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get('/', (req, res) => {
-  res.json('WANDER app');
+  res.json('WANDER App');
 });
 
 app.get('/login', (req, res) => {
@@ -33,33 +33,40 @@ app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   dbConfig.getuserByEmail(email, (err, user) => {
-    if (err) {
-      throw err;
-    }
+    if (err) throw err;
     if (!user) {
-      res.json('User does not exist');
+      return res.json('User does not exist');
     }
     dbConfig.comparePassword(password, user.password, (err, isMatch) => {
-      if (err) {
-        throw err;
-      }
+      if (err) throw err;
       if (isMatch) {
-        const token = jwt.sign(user, db.pw);
+        const token = jwt.sign(user, db.pw, {expiresIn: 2592000000});
 
-        res.json(`token: ${token}`);
+        return res.json({success: true, token: token, user:{
+          id: user.id,
+          email: user.email,
+          password: user.password,
+        }
+        });
       } else {
 
-        res.json('Password is incorrect');
+        return res.json('Password is incorrect');
       }
     });
   });
 });
 
 app.get('/signup', (req, res) => {
-
+  res.redirect('/signup');
 });
 
 app.post('/signup', (req, res) => {
+  dbConfig.getuserByEmail(req.body.email, (err, user) => {
+    if (err) throw err;
+    if (user) {
+      return res.json('An account already exists under this email');
+    }
+  });
   const newUser = new db.User({
     name: req.body.username,
     email_address: req.body.email,
@@ -67,11 +74,9 @@ app.post('/signup', (req, res) => {
   });
   dbConfig.createUser(newUser, (err, user) => {
     if (err) {
-
-      res.json('User was not created ', err);
+      return res.json({success: false, message: 'User was not created'});
     } else {
-
-      return res.json('User created');
+      return res.json({success: true, message: 'User was created'});
     }
   });
 });
@@ -81,8 +86,11 @@ app.get('/dashboard', (req, res) => {
 });
 
 app.get('/logout', (req, res) => {
-  
+  res.redirect('/');
 });
+/*
+    Dynamically Add types to type table
+*/
 
 app.post('/type', (req, res) => {
   let type = req.body;

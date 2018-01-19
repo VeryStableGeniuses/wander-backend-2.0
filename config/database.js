@@ -4,19 +4,10 @@
  * To connect to Postico, use the password below with the cloud_sql_proxy running
  */
 
-
 require('dotenv').config();
 const Sequelize = require('sequelize');
 
 const pw = 'stablegenius';
-
-// if (process.env.PROD) {
-//   pw = 'stablegenius';
-// }
-// const sequelize = new Sequelize('wander', 'wander', pw, {
-//   host: 'wander-app.c2xrfwg5wokn.us-east-2.rds.amazonaws.com',
-//   dialect: 'postgres',
-// });
 
 const sequelize = new Sequelize('wander', 'wander', 'stablegenius', {
   host: 'wander-app.c2xrfwg5wokn.us-east-2.rds.amazonaws.com',
