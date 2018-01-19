@@ -63,10 +63,8 @@ app.post('/signup', (req, res) => {
   });
   dbConfig.createUser(newUser, (err, user) => {
     if (err) {
-
       res.json('User was not created ', err);
     } else {
-
       return res.json('User created');
     }
   });
@@ -103,7 +101,7 @@ app.get('/types', (req, res) => {
 
 
 app.get('/users', (req, res) => {
-  db.getUsers((err, users) => {
+  dbConfig.getUsers((err, users) => {
     if (err) {
       console.error(err);
     } else {
@@ -114,7 +112,7 @@ app.get('/users', (req, res) => {
 
 app.get('/user_likes', (req, res) => {
   let userId = req.params.uid;
-  db.getUserLikes(userId, (err, likes) => {
+  dbConfig.getUserLikes(userId, (err, likes) => {
     if (err) {
       console.error(err);
     } else {
@@ -125,7 +123,7 @@ app.get('/user_likes', (req, res) => {
 
 app.post('/event', (req, res) => {
   let event = req.body;
-  db.addEvent(event, (err, newEvent) => {
+  dbConfig.addEvent(event, (err, newEvent) => {
     if (err) {
       console.error(err);
     } else {
@@ -136,7 +134,7 @@ app.post('/event', (req, res) => {
 
 app.post('/schedule', (req, res) => {
   let schedule = req.body;
-  db.createSchedule(schedule, (err, newSchedule) => {
+  dbConfig.createSchedule(schedule, (err, newSchedule) => {
     if (err) {
       console.error(err);
     } else {
