@@ -144,12 +144,45 @@ app.post('/schedule', (req, res) => {
   });
 });
 
+app.get('/schedule/:sid/events', (req, res) => {
+  let sid = req.params.sid;
+  dbConfig.getEventsForSchedule(sid, (err, events) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(events);
+    }
+  });
+});
+
+app.get('/user/:uid/schedule', (req, res) => {
+  let uid = req.params.uid;
+  dbConfig.getSchedulesForUser(uid, (err, schedule) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(schedule);
+    }
+  });
+});
+
 app.get('/photos', (req, res) => {
   dbConfig.getPhotos((err, photos) => {
     if (err) {
       console.error(err);
     } else {
       res.send(photos);
+    }
+  });
+});
+
+app.post('/user/:uid/generate-schedule', (req, res) => {
+  let eventSchedule = req.body;
+  dbConfig.createScheduleForUser(schedule, (err, userSchedule) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(userSchedule.dataValues);
     }
   });
 });

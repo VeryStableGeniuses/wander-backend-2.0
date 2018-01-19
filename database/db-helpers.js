@@ -8,6 +8,8 @@ const bcrypt = require('bcrypt-nodejs');
 const sequelize = require('./database');
 require('./associations');
 
+const scheduleBuilder = require('../scheduleBuilder');
+
 const {
   Type,
   User,
@@ -286,16 +288,24 @@ module.exports = {
       });
   },
 
-  getUserSchedule: (user, callback) => {
-    User.findById(user.id)
-      .then(user => {
-        return user.getUserSchedule();
+  getSchedulesForUser: (uid, callback) => {
+    Schedule.findAll({ where: { id_user: uid } })
+      .then(schedules => {
+        return schedules;
       })
-      .then(schedule => {
-        Schedule.findById(schedule.id);
-      })
-      .then(schedule => {
-        return schedule.getUserSchedule();
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  createScheduleForUser: () => {
+    scheduleBuilder.getSchedule;
+  },
+
+  getEventsForSchedule: (sid, callback) => {
+    EventSchedule.findAll({ where: { id_schedule: sid } })
+      .then(events => {
+        return events;
       })
       .catch(err => {
         callback(err);
