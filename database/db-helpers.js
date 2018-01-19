@@ -5,6 +5,9 @@
 
 const bcrypt = require('bcrypt-nodejs');
 
+const sequelize = require('./database');
+require('./associations');
+
 const {
   Type,
   User,
@@ -15,7 +18,7 @@ const {
   Photo,
   Hometown,
   UserHometown
-} = require('./database');
+} = require('./models/exports');
 
 module.exports = {
   getTypes: callback => {
@@ -29,7 +32,6 @@ module.exports = {
   },
 
   addType: (type, callback) => {
-    console.log('adding type', type);
     Type.create(type, { fields: ['name'] })
       .then(type => {
         callback(null, type);
@@ -83,9 +85,9 @@ module.exports = {
   },
 
   getuserByEmail: (email, callback) => {
-    User.findOne({email: email}, callback);
+    User.findOne({ email: email }, callback);
   },
-    
+
   updateUser: (user, callback) => {
     User.findById(user.id)
       .then(found => {
@@ -131,11 +133,22 @@ module.exports = {
       });
   },
 
+  addUserLike: (userLike, callback) => {
+    console.log('user like', userLike); 
+    UserLike.create(userLike, { fields: ['id_type', 'id_user', 'like'] })
+      .then(userLike => {
+        callback(null, userLike);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
   updateUserLikes: (userLike, callback) => {
     UserLike.findById(userLike.id)
       .then(found => {
         return found
-          .update(userLike, { fields: ['id_type', 'id_user', 'like/dislike'] })
+          .update(userLike, { fields: ['id_type', 'id_user', 'like'] })
           .save();
       })
       .then(updatedUserLike => {
@@ -375,4 +388,3 @@ module.exports = {
       });
   }
 };
-

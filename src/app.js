@@ -5,8 +5,8 @@ const express = require('express'),
   PORT = process.env.PORT || 3000,
   passport = require('passport'),
   jwt = require('jsonwebtoken'),
-  db = require('../config/database'),
-  dbConfig = require('../config/db-helpers');
+  db = require('../database/database'),
+  dbConfig = require('../database/db-helpers');
 
 require('../auth/local-auth')(passport);
 
@@ -21,9 +21,7 @@ app.get('/', (req, res) => {
   res.json('WANDER app');
 });
 
-app.get('/login', (req, res) => {
-
-});
+app.get('/login', (req, res) => {});
 
 app.post('/login', (req, res) => {
   const email = req.body.email;
@@ -41,25 +39,21 @@ app.post('/login', (req, res) => {
       }
       if (isMatch) {
         const token = jwt.sign(user, db.pw);
-
         res.json(`token: ${token}`);
       } else {
-
         res.json('Password is incorrect');
       }
     });
   });
 });
 
-app.get('/signup', (req, res) => {
-
-});
+app.get('/signup', (req, res) => {});
 
 app.post('/signup', (req, res) => {
   const newUser = new db.User({
     name: req.body.username,
     email_address: req.body.email,
-    password: req.body.password,
+    password: req.body.password
   });
   dbConfig.createUser(newUser, (err, user) => {
     if (err) {
@@ -70,13 +64,9 @@ app.post('/signup', (req, res) => {
   });
 });
 
-app.get('/dashboard', (req, res) => {
+app.get('/dashboard', (req, res) => {});
 
-});
-
-app.get('/logout', (req, res) => {
-  
-});
+app.get('/logout', (req, res) => {});
 
 app.post('/type', (req, res) => {
   let type = req.body;
@@ -99,7 +89,6 @@ app.get('/types', (req, res) => {
   });
 });
 
-
 app.get('/users', (req, res) => {
   dbConfig.getUsers((err, users) => {
     if (err) {
@@ -117,6 +106,17 @@ app.get('/user_likes', (req, res) => {
       console.error(err);
     } else {
       res.send(likes);
+    }
+  });
+});
+
+app.post('/user_like', (req, res) => {
+  let userLike = req.body;
+  dbConfig.addUserLike(userLike, (err, userLike) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(userLike.dataValues);
     }
   });
 });
