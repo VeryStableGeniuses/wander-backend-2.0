@@ -1,15 +1,15 @@
 require('dotenv').config;
 const JwtStrategy = require('passport-jwt').Strategy,
   ExtractJwt = require('passport-jwt').ExtractJwt,
-  db = require('../config/database'),
-  dbConfig = require('../config/db-helpers');
+  db = require('../database/database'),
+  dbConfig = require('../database/db-helpers');
 
 module.exports = function (passport) {
 
   var opts = {};
   
   opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-  opts.secretOrKey = db.pw;
+  opts.secretOrKey = 'stablegenius';
   // opts.issuer = 'accounts.examplesoft.com';
   // opts.audience = 'yoursite.net';
   

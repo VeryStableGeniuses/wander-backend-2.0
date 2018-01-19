@@ -2,22 +2,19 @@ require('dotenv').config();
 const express = require('express'),
   bodyParser = require('body-parser'),
   app = express(),
-  cookieParser = require('cookie-parser'),
-  morgan = require('morgan'),
   PORT = process.env.PORT || 3000,
   passport = require('passport'),
   jwt = require('jsonwebtoken'),
-  db = require('../config/database'),
-  dbConfig = require('../config/db-helpers');
+  db = require('../database/database'),
+  dbConfig = require('../database/db-helpers'),
+  models = require('../database/models/exports');
 
 require('../auth/local-auth')(passport);
 
 app.use(express.static(`${__dirname}/dist`));
 // set morgan to log info about our requests for development
-app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(cookieParser());
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -25,9 +22,7 @@ app.get('/', (req, res) => {
   res.json('WANDER app');
 });
 
-app.get('/login', (req, res) => {
-
-});
+app.get('/login', (req, res) => {});
 
 app.post('/login', (req, res) => {
   const email = req.body.email;
@@ -45,44 +40,34 @@ app.post('/login', (req, res) => {
       }
       if (isMatch) {
         const token = jwt.sign(user, db.pw);
-
         res.json(`token: ${token}`);
       } else {
-
         res.json('Password is incorrect');
       }
     });
   });
 });
 
-app.get('/signup', (req, res) => {
-
-});
+app.get('/signup', (req, res) => {});
 
 app.post('/signup', (req, res) => {
-  const newUser = new db.User({
+  const newUser = new models.User({
     name: req.body.username,
     email_address: req.body.email,
-    password: req.body.password,
+    password: req.body.password
   });
   dbConfig.createUser(newUser, (err, user) => {
     if (err) {
-
       res.json('User was not created ', err);
     } else {
-
       return res.json('User created');
     }
   });
 });
 
-app.get('/dashboard', (req, res) => {
+app.get('/dashboard', (req, res) => {});
 
-});
-
-app.get('/logout', (req, res) => {
-  
-});
+app.get('/logout', (req, res) => {});
 
 app.post('/type', (req, res) => {
   let type = req.body;
@@ -105,8 +90,93 @@ app.get('/types', (req, res) => {
   });
 });
 
+app.get('/users', (req, res) => {
+  dbConfig.getUsers((err, users) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(users);
+    }
+  });
+});
+
+app.get('/user/:uid/likes', (req, res) => {
+  let userId = req.params.uid;
+  dbConfig.getUserLikes(userId, (err, likes) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(likes);
+    }
+  });
+});
+
+app.post('/user_like', (req, res) => {
+  let userLike = req.body;
+  dbConfig.addUserLike(userLike, (err, userLike) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(userLike.dataValues);
+    }
+  });
+});
+
+app.post('/event', (req, res) => {
+  let event = req.body;
+  dbConfig.addEvent(event, (err, newEvent) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(newEvent.dataValues);
+    }
+  });
+});
+
+app.post('/schedule', (req, res) => {
+  let schedule = req.body;
+  dbConfig.createSchedule(schedule, (err, newSchedule) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(newSchedule.dataValues);
+    }
+  });
+});
+
+app.get('/photos', (req, res) => {
+  dbConfig.getPhotos((err, photos) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(photos);
+    }
+  });
+});
+
+// app.get('/photo', (req, res) => {
+//   dbConfig.getPhotoById((err, photo) => {
+//     if (err) {
+//       console.error(err);
+//     } else {
+//       res.send(photo);
+//     }
+//   });
+// });
+
+app.post('/photo', (req, res) => {
+  let photo = req.body;
+  dbConfig.addPhoto(photo, (err, newPhoto) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(newPhoto.dataValues);
+    }
+  });
+});
+
 // route for handling 404 requests(unavailable routes)
-app.use(function (req, res) {
+app.use(function(req, res) {
   res.status(404).send('Sorry can\'t find that!');
 });
 
