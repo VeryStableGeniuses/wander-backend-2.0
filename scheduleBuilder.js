@@ -79,25 +79,13 @@ const findRestaurant = (location, placed, restaurants) => {
       Number(restaurant.restaurant.location.longitude),
     ));
   const sorted = restaurants.sort((a, b) => a.distanceFromTopRated - b.distanceFromTopRated);
-  // if (placed === 0) {
-  //   for (let i = 0; i < sorted.length; i++) {
-  //     console.log(sorted[i].restaurant);
-  //     if (breakfast[sorted[i].restaurant.cuisines]) {
-  //       const result = sorted[i];
-  //       sorted.splice(i, 1);
-  //       return result;
-  //     }
-  //   }
-  // } else {
-  //   for (let i = 0; i < sorted.length; i++) {
-  //     if (other[sorted[i].restaurant.cuisines]) {
-  //       const result = sorted[i];
-  //       sorted.splice(i, 1);
-  //       return result;
-  //     }
-  //   }
-  // }
-  const result = sorted[0];
+  const result = {
+    name: sorted[0].restaurant.name,
+    location: {
+      latitude: Number(sorted[0].restaurant.location.latitude),
+      longitude: Number(sorted[0].restaurant.location.longitude), 
+    },
+  };
   sorted.splice(0, 1);
   return result;
 };
@@ -109,7 +97,10 @@ const fillDay = (day, rankedList, interests, currentDay, restaurants) => {
   let eventsPlaced = 0;
   let restaurantsPlaced = 0;
   while(timeSpent <= 12 && currentEvent < rankedList.length) {
-    day[`event${++eventsPlaced}`] = rankedList[currentEvent];
+    day[`event${++eventsPlaced}`] = {
+      name: rankedList[currentEvent].name,
+      location: { latitude: rankedList[currentEvent].geometry.location.lat, longitude: rankedList[currentEvent].geometry.location.lng},
+    };
     if (attractionTimes[rankedList[currentEvent].types[0]]) {
       timeSpent += attractionTimes[rankedList[currentEvent].types[0]];
     } else {
@@ -128,10 +119,12 @@ const scheduleBuilder = (startDate, endDate, google, restaurantData, interests) 
   // Get the user's interests and dislikes, store them in arrays
   
   const dislikes = ['aquarium', 'casino'];
-  console.log('google', google);
 
   // Figure out what the current day of the week is to check if it's open then
   let currentDay = startDate.getDay();
+
+  let currentDate = startDate;
+  // startDate = 0;
 
   // Initialize the empty schedule object
   const schedule = {};
@@ -155,6 +148,8 @@ const scheduleBuilder = (startDate, endDate, google, restaurantData, interests) 
   const days = Object.keys(schedule);
   days.forEach((day) => {
     fillDay(schedule[day], sortedAndRated, interests, currentDay, restaurantData.restaurants);
+    schedule[day].date = new Date(currentDate);
+    currentDate.setDate(currentDate.getDate() + 1);
     currentDay = currentDay < 7 ? currentDay + 1 : 0;
   });
   return schedule;
@@ -181,7 +176,6 @@ const end = new Date('Febrauary 13, 2018 00:00:00');
 const query = 'New Orleans';
 const interests = ['museum', 'park', 'point_of_interest', 'music'];
 
-// getSchedule(start, end, query, interests, (schedule) => console.log(schedule));
+getSchedule(start, end, query, interests, (schedule) => console.log(schedule));
 
 module.exports.getSchedule = getSchedule;
-
