@@ -3,7 +3,6 @@
  * Set up schemas and table associations.
  */
 
-
 require('dotenv').config();
 const Sequelize = require('sequelize');
 
@@ -109,7 +108,7 @@ const Photo = sequelize.define('photo', {
 Photo.sync();
 
 Photo.belongsTo(User, { foreignKey: 'id_user' });
-User.hasMany(Photo, { foreignKey: 'id_user'});
+User.hasMany(Photo, { foreignKey: 'id_user' });
 
 
 // define Hometown
@@ -125,11 +124,11 @@ const UserHometown = sequelize.define('user_hometown', {
 
 UserHometown.sync();
 
-UserHometown.belongsTo(Hometown, { foreignKey: 'user_hometown'});
-Hometown.hasMany(UserHometown, { foreignKey: 'user_hometown'});
+UserHometown.belongsTo(Hometown, { foreignKey: 'user_hometown' });
+Hometown.hasMany(UserHometown, { foreignKey: 'user_hometown' });
 
 UserHometown.belongsTo(User, { foreignKey: 'id_user' });
-User.hasOne(UserHometown, { foreignKey: 'id_user'});
+User.hasOne(UserHometown, { foreignKey: 'id_user' });
 
 module.exports = {
   Type,
@@ -141,4 +140,5 @@ module.exports = {
   Photo,
   Hometown,
   UserHometown,
+  pw
 };

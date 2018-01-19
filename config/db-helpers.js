@@ -3,7 +3,7 @@
  * Create methods to interact with database.
  */
 
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt-nodejs');
 
 const {
   Type,
@@ -51,7 +51,7 @@ module.exports = {
 
   createUser: (newUser, callback) => {
     bcrypt.genSalt(10, (err, salt) => {
-      bcrypt.hash(newUser.password, salt, (err, hash) => {
+      bcrypt.hash(newUser.password, salt, null, (err, hash) => {
         if (err) throw err;
         newUser.password = hash;
         User.create(newUser, { fields: ['name', 'password', 'email_address'] })
@@ -82,6 +82,10 @@ module.exports = {
       });
   },
 
+  getuserByEmail: (email, callback) => {
+    User.findOne({email: email}, callback);
+  },
+    
   updateUser: (user, callback) => {
     User.findById(user.id)
       .then(found => {
@@ -372,8 +376,3 @@ module.exports = {
   }
 };
 
-/** TODO:
- * get each row from a table by id (get user by id, etc.)
- * CRUD for each table (delete user, update user by id, get user by id, etc.)
- *
- */
