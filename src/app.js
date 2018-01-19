@@ -6,7 +6,8 @@ const express = require('express'),
   passport = require('passport'),
   jwt = require('jsonwebtoken'),
   db = require('../database/database'),
-  dbConfig = require('../database/db-helpers');
+  dbConfig = require('../database/db-helpers'),
+  models = require('../database/models/exports');
 
 require('../auth/local-auth')(passport);
 
@@ -50,7 +51,7 @@ app.post('/login', (req, res) => {
 app.get('/signup', (req, res) => {});
 
 app.post('/signup', (req, res) => {
-  const newUser = new db.User({
+  const newUser = new models.User({
     name: req.body.username,
     email_address: req.body.email,
     password: req.body.password
@@ -99,7 +100,7 @@ app.get('/users', (req, res) => {
   });
 });
 
-app.get('/user_likes', (req, res) => {
+app.get('/user/:uid/likes', (req, res) => {
   let userId = req.params.uid;
   dbConfig.getUserLikes(userId, (err, likes) => {
     if (err) {
@@ -139,6 +140,37 @@ app.post('/schedule', (req, res) => {
       console.error(err);
     } else {
       res.send(newSchedule.dataValues);
+    }
+  });
+});
+
+app.get('/photos', (req, res) => {
+  dbConfig.getPhotos((err, photos) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(photos);
+    }
+  });
+});
+
+// app.get('/photo', (req, res) => {
+//   dbConfig.getPhotoById((err, photo) => {
+//     if (err) {
+//       console.error(err);
+//     } else {
+//       res.send(photo);
+//     }
+//   });
+// });
+
+app.post('/photo', (req, res) => {
+  let photo = req.body;
+  dbConfig.addPhoto(photo, (err, newPhoto) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(newPhoto.dataValues);
     }
   });
 });

@@ -117,14 +117,7 @@ module.exports = {
   },
 
   getUserLikes: (userId, callback) => {
-    User.findById(userId)
-      .then(user => {
-        if (user) {
-          return user.getUserLikes();
-        } else {
-          console.log('user is not defined');
-        }
-      })
+    UserLike.findAll({ where: { id_user: userId } })
       .then(userLikes => {
         callback(null, userLikes);
       })
@@ -134,7 +127,7 @@ module.exports = {
   },
 
   addUserLike: (userLike, callback) => {
-    console.log('user like', userLike); 
+    console.log('user like', userLike);
     UserLike.create(userLike, { fields: ['id_type', 'id_user', 'like'] })
       .then(userLike => {
         callback(null, userLike);
@@ -321,6 +314,16 @@ module.exports = {
 
   getPhotoById: (photo, callback) => {
     Photo.findById(photo.id)
+      .then(photo => {
+        callback(null, photo);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  addPhoto: (photo, callback) => {
+    Photo.create(photo, { fields: ['url'] })
       .then(photo => {
         callback(null, photo);
       })
