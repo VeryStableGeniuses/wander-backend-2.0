@@ -30,18 +30,20 @@ app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   dbConfig.getuserByEmail(email, (err, user) => {
+    console.log(user.dataValues); // The dataValues object contains the fields from the database. This is what we need
     if (err) {
       throw err;
     }
     if (!user) {
       res.json('User does not exist');
     }
-    dbConfig.comparePassword(password, user.password, (err, isMatch) => {
+    dbConfig.comparePassword(password, user.dataValues.password, (err, isMatch) => {
       if (err) {
         throw err;
       }
       if (isMatch) {
-        const token = jwt.sign(user, db.pw);
+      
+        const token = jwt.sign(user.dataValues, process.env.LOCALSECRET);
         res.json(`token: ${token}`);
       } else {
         res.json('Password is incorrect');
