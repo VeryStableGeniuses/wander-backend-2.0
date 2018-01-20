@@ -178,7 +178,7 @@ app.get('/photos', (req, res) => {
   });
 });
 
-app.post('/user/:uid/eventschedule', (req, res) => {
+app.post('/user/:uid/event_schedule', (req, res) => {
   // the body here includes:
   // uid: the user's id
   // start: the start time
@@ -190,18 +190,40 @@ app.post('/user/:uid/eventschedule', (req, res) => {
   // const query = 'New Orleans';
   // const interests = ['museum', 'park', 'point_of_interest', 'music'];
 
-  const uid = req.body.uid;
+  let uid = req.body.userId;
   dbConfig.getUserLikes(uid, (err, likes) => {
-    const start = req.body.start;
-    const end = req.body.end;
-    const location = req.body.location;
-    getSchedule(start, end, location, likes, schedule => {
-      for (event in schedule) {
-        dbConfig.addEventSchedule(event, (err, res) => {});
+    let startDate = req.body.startDate;
+    let endDate = req.body.endDate;
+    let location = req.body.location;
+    getSchedule(startDate, endDate, location, likes, schedule => {
+      for (let event in schedule) {
+        dbConfig.createSchedule(event, (err, newSchedule) => {
+          if (err) {
+            console.error(err);
+          } else {
+            res.send(newSchedule.dataValues);
+          }
+        });
       }
     });
   });
 });
+
+// app.post('/schedule', (req, res) => {
+//   let schedule = req.body;
+//   dbConfig.createSchedule(schedule, (err, newSchedule) => {
+//     if (err) {
+//       console.error(err);
+//     } else {
+//       res.send(newSchedule.dataValues);
+//     }
+//   });
+// });
+
+// { startDate: '2018-02-20T18:03:13.000Z',
+//   endDate: '2018-02-22T18:03:13.000Z',
+//   location: 'New York City, NY, United States',
+//   userId: '1' }
 
 // app.get('/photo', (req, res) => {
 //   dbConfig.getPhotoById((err, photo) => {

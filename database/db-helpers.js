@@ -235,16 +235,6 @@ module.exports = {
       });
   },
 
-  createSchedule: (schedule, callback) => {
-    Schedule.create(schedule, { fields: ['name'] })
-      .then(schedule => {
-        callback(null, schedule);
-      })
-      .catch(err => {
-        callback(err);
-      });
-  },
-
   getScheduleById: (schedule, callback) => {
     Schedule.findById(schedule.id)
       .then(schedule => {
@@ -317,11 +307,30 @@ module.exports = {
   //       callback(err);
   //     });
   // },
+  // createSchedule: (schedule, callback) => {
+  //   Schedule.create(schedule, { fields: ['name'] })
+  //     .then(schedule => {
+  //       callback(null, schedule);
+  //     })
+  //     .catch(err => {
+  //       callback(err);
+  //     });
+  // },
 
-  addEventSchedule: (u=event, callback) => {
+  addEventSchedule: (event, callback) => {
     EventSchedule.create(event, { fields: ['name'] })
       .then(schedule => {
         callback(null, schedule);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  createSchedule: (schedule, addEventSchedule, callback) => {
+    Schedule.create(schedule, { fields: ['name'] })
+      .then(schedule => {
+        addEventSchedule(null, schedule);
       })
       .catch(err => {
         callback(err);
