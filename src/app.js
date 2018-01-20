@@ -11,7 +11,7 @@ const express = require('express'),
 
 require('../auth/local-auth')(passport);
 
-const getSchedule = require('../scheduleBuilder');
+const { getSchedule } = require('../scheduleBuilder');
 
 // app.use(express.static(`${__dirname}/dist`));
 // set morgan to log info about our requests for development
@@ -130,7 +130,7 @@ app.post('/event', (req, res) => {
     if (err) {
       console.error(err);
     } else {
-      res.send(newEvent.dataValues);
+      res.send('added new event');
     }
   });
 });
@@ -180,30 +180,58 @@ app.get('/photos', (req, res) => {
   });
 });
 
-app.post('/user/:uid/eventschedule', (req, res) => {
-  // the body here includes:
-  // uid: the user's id
-  // start: the start time
-  // end: the end time
-  // location: the location
+app.post('/user/:uid/event_schedule', (req, res) => {
+  console.log('at beginning of POST', req);
+  //   // the body here includes:
+  //   // uid: the user's id
+  //   // start: the start time
+  //   // end: the end time
+  //   // location: the location
 
-  // const start = new Date('February 10, 2018 00:00:00');
-  // const end = new Date('Febrauary 13, 2018 00:00:00');
-  // const query = 'New Orleans';
-  // const interests = ['museum', 'park', 'point_of_interest', 'music'];
+  //   // const start = new Date('February 10, 2018 00:00:00');
+  //   // const end = new Date('Febrauary 13, 2018 00:00:00');
+  //   // const query = 'New Orleans';
+  //   // const interests = ['museum', 'park', 'point_of_interest', 'music'];
 
-  const uid = req.body.uid;
+  let uid = req.body.userId;
   dbConfig.getUserLikes(uid, (err, likes) => {
-    const start = req.body.start;
-    const end = req.body.end;
-    const location = req.body.location;
-    getSchedule(start, end, location, likes, schedule => {
-      for (event in schedule) {
-        dbConfig.addEventSchedule(event, (err, res) => { });
+    let startDate = req.body.startDate;
+    console.log('start date before getSchedule', startDate);
+    let endDate = req.body.endDate;
+    let location = req.body.location;
+    console.log(location);
+    getSchedule(startDate, endDate, location, likes, schedule => {
+      console.log('start date in POST', startDate);
+      console.log('end date in POST', endDate);
+      console.log('location in POST', location);
+      for (let event in schedule) {
+        dbConfig.createSchedule(event, (err, newSchedule) => {
+          if (err) {
+            console.error(err);
+          } else {
+            res.send(newSchedule.dataValues);
+          }
+        });
       }
     });
   });
 });
+
+// app.post('/schedule', (req, res) => {
+//   let schedule = req.body;
+//   dbConfig.createSchedule(schedule, (err, newSchedule) => {
+//     if (err) {
+//       console.error(err);
+//     } else {
+//       res.send(newSchedule.dataValues);
+//     }
+//   });
+// });
+
+// { startDate: '2018-02-20T18:03:13.000Z',
+//   endDate: '2018-02-22T18:03:13.000Z',
+//   location: 'New York City, NY, United States',
+//   userId: '1' }
 
 // app.get('/photo', (req, res) => {
 //   dbConfig.getPhotoById((err, photo) => {
