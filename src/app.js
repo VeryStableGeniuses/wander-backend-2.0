@@ -11,6 +11,8 @@ const express = require('express'),
 
 require('../auth/local-auth')(passport);
 
+const getSchedule = require('../scheduleBuilder');
+
 app.use(express.static(`${__dirname}/dist`));
 // set morgan to log info about our requests for development
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -176,14 +178,28 @@ app.get('/photos', (req, res) => {
   });
 });
 
-app.post('/user/:uid/generate-schedule', (req, res) => {
-  let eventSchedule = req.body;
-  dbConfig.createScheduleForUser(schedule, (err, userSchedule) => {
-    if (err) {
-      console.error(err);
-    } else {
-      res.send(userSchedule.dataValues);
-    }
+app.post('/user/:uid/eventschedule', (req, res) => {
+  // the body here includes:
+  // uid: the user's id
+  // start: the start time
+  // end: the end time
+  // location: the location
+
+  // const start = new Date('February 10, 2018 00:00:00');
+  // const end = new Date('Febrauary 13, 2018 00:00:00');
+  // const query = 'New Orleans';
+  // const interests = ['museum', 'park', 'point_of_interest', 'music'];
+
+  const uid = req.body.uid;
+  dbConfig.getUserLikes(uid, (err, likes) => {
+    const start = req.body.start;
+    const end = req.body.end;
+    const location = req.body.location;
+    getSchedule(start, end, location, likes, schedule => {
+      for (event in schedule) {
+        dbConfig.addEventSchedule(event, (err, res) => {});
+      }
+    });
   });
 });
 

@@ -5,10 +5,10 @@
 
 const bcrypt = require('bcrypt-nodejs');
 
-const sequelize = require('./database');
-require('./associations');
+const sequelize = require('./database'),
+  associations = require('./associations');
 
-const buildSchedule = require('../scheduleBuilder');
+// const scheduleBuilder = require('../scheduleBuilder');
 
 const {
   Type,
@@ -298,13 +298,30 @@ module.exports = {
       });
   },
 
-  createScheduleForUser: (userSchedule, callback) => {
-    buildSchedule.scheduleBuilder()
-      .then(userSchedule => {
-        callback(null, userSchedule);
-      })
-      .then(EventSchedule => {
-        callback(null, EventSchedule);
+  // createScheduleForUser: (userSchedule, callback) => {
+  //   scheduleBuilder
+  //     .getSchedule(
+  //       new Date('February 10, 2018 00:00:00'),
+  //       new Date('Febrauary 13, 2018 00:00:00'),
+  //       'New Orleans',
+  //       ['museum', 'park', 'point_of_interest', 'music'],
+  //       callback
+  //     )
+  //     .then(userSchedule => {
+  //       callback(null, userSchedule);
+  //     })
+  //     .then(EventSchedule => {
+  //       callback(null, EventSchedule);
+  //     })
+  //     .catch(err => {
+  //       callback(err);
+  //     });
+  // },
+
+  addEventSchedule: (u=event, callback) => {
+    EventSchedule.create(event, { fields: ['name'] })
+      .then(schedule => {
+        callback(null, schedule);
       })
       .catch(err => {
         callback(err);
