@@ -89,11 +89,13 @@ module.exports = {
   getuserByEmail: (email, callback) => {
     User.findOne({
       where: { email_address: email }
-    }).then(user => {
-      callback(null, user);
-    }).catch(err => {
-      callback(err);
-    });
+    })
+      .then(user => {
+        callback(null, user);
+      })
+      .catch(err => {
+        callback(err);
+      });
   },
 
   updateUser: (user, callback) => {
@@ -323,17 +325,18 @@ module.exports = {
   //     });
   // },
 
-  createSchedule: (schedule, callback) => {
-    Schedule.create(schedule, { fields: ['name'] })
-      .then(schedule => {
-        callback(null, schedule);
-      })
-      .catch(err => {
-        callback(err);
-      });
-  },
+  // createSchedule: (schedule, callback) => {
+  //   Schedule.create(schedule, { fields: ['name'] })
+  //     .then(schedule => {
+  //       callback(null, schedule);
+  //     })
+  //     .catch(err => {
+  //       callback(err);
+  //     });
+  // },
 
   addEventSchedule: (event, callback) => {
+    console.log('before EventSchedule.create in addEventSchedule', event);
     EventSchedule.create(event, { fields: ['name'] })
       .then(schedule => {
         callback(null, schedule);
@@ -344,6 +347,7 @@ module.exports = {
   },
 
   createSchedule: (schedule, addEventSchedule, callback) => {
+    console.log('before Schedule.create in createSchedule', schedule);
     Schedule.create(schedule, { fields: ['name'] })
       .then(schedule => {
         addEventSchedule(null, schedule);

@@ -11,7 +11,7 @@ const express = require('express'),
 
 require('../auth/local-auth')(passport);
 
-const getSchedule = require('../scheduleBuilder');
+const { getSchedule } = require('../scheduleBuilder');
 
 // app.use(express.static(`${__dirname}/dist`));
 // set morgan to log info about our requests for development
@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
   res.json('WANDER app');
 });
 
-app.get('/login', (req, res) => { });
+app.get('/login', (req, res) => {});
 
 app.post('/login', (req, res) => {
   const email = req.body.email;
@@ -50,7 +50,7 @@ app.post('/login', (req, res) => {
   });
 });
 
-app.get('/signup', (req, res) => { });
+app.get('/signup', (req, res) => {});
 
 app.post('/signup', (req, res) => {
   const newUser = new models.User({
@@ -67,9 +67,9 @@ app.post('/signup', (req, res) => {
   });
 });
 
-app.get('/dashboard', (req, res) => { });
+app.get('/dashboard', (req, res) => {});
 
-app.get('/logout', (req, res) => { });
+app.get('/logout', (req, res) => {});
 
 app.post('/type', (req, res) => {
   let type = req.body;
@@ -130,7 +130,7 @@ app.post('/event', (req, res) => {
     if (err) {
       console.error(err);
     } else {
-      res.send(newEvent.dataValues);
+      res.send('added new event');
     }
   });
 });
@@ -181,23 +181,29 @@ app.get('/photos', (req, res) => {
 });
 
 app.post('/user/:uid/event_schedule', (req, res) => {
-  // the body here includes:
-  // uid: the user's id
-  // start: the start time
-  // end: the end time
-  // location: the location
+   console.log('at beginning of POST', req);
+  //   // the body here includes:
+  //   // uid: the user's id
+  //   // start: the start time
+  //   // end: the end time
+  //   // location: the location
 
-  // const start = new Date('February 10, 2018 00:00:00');
-  // const end = new Date('Febrauary 13, 2018 00:00:00');
-  // const query = 'New Orleans';
-  // const interests = ['museum', 'park', 'point_of_interest', 'music'];
+  //   // const start = new Date('February 10, 2018 00:00:00');
+  //   // const end = new Date('Febrauary 13, 2018 00:00:00');
+  //   // const query = 'New Orleans';
+  //   // const interests = ['museum', 'park', 'point_of_interest', 'music'];
 
   let uid = req.body.userId;
   dbConfig.getUserLikes(uid, (err, likes) => {
     let startDate = req.body.startDate;
+    console.log('start date before getSchedule', startDate);
     let endDate = req.body.endDate;
     let location = req.body.location;
+    console.log(location);
     getSchedule(startDate, endDate, location, likes, schedule => {
+      console.log('start date in POST', startDate);
+      console.log('end date in POST', endDate);
+      console.log('location in POST', location);
       for (let event in schedule) {
         dbConfig.createSchedule(event, (err, newSchedule) => {
           if (err) {
@@ -249,7 +255,7 @@ app.post('/photo', (req, res) => {
 });
 
 // route for handling 404 requests(unavailable routes)
-app.use(function (req, res) {
+app.use(function(req, res) {
   res.status(404).send('Sorry can\'t find that!');
 });
 
