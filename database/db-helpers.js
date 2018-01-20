@@ -240,11 +240,7 @@ module.exports = {
         callback(err);
       });
   },
-<<<<<<< HEAD
 
-=======
-  
->>>>>>> 099f70e843d141d999b1e74a47611117eaf08667
   getScheduleById: (schedule, callback) => {
     Schedule.findById(schedule.id)
       .then(schedule => {
