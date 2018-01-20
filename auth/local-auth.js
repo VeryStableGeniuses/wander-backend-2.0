@@ -9,11 +9,11 @@ module.exports = function (passport) {
   passport.use(new JwtStrategy({
     jwtFromRequest: ExtractJwt.fromHeader('authorization'),
     secretOrKey: process.env.LOCALSECRET
-  }, async (payload, done) => {
+  }, (payload, done) => {
     // console.log('this is payload id ', payload.id);
     // console.log('this is payload ', payload);
     try {
-      const user = await dbUser.findById(payload.id);
+      const user = dbUser.findById(payload.id);
       if (!user) {
         return done(null, false);
       }
