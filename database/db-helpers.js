@@ -65,7 +65,6 @@ module.exports = {
           });
       });
     });
-    return;
   },
 
   comparePassword: (password, hash, callback) => {
@@ -86,7 +85,13 @@ module.exports = {
   },
 
   getuserByEmail: (email, callback) => {
-    User.findOne({ email: email }, callback);
+    User.findOne({
+      where: { email_address: email }
+    }).then(user => {
+      callback(null, user);
+    }).catch(err => {
+      callback(err);
+    });
   },
 
   updateUser: (user, callback) => {

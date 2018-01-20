@@ -5,7 +5,7 @@ const express = require('express'),
   PORT = process.env.PORT || 3000,
   passport = require('passport'),
   jwt = require('jsonwebtoken'),
-  db = require('../database/database'),
+  auth = require('../auth/local-auth'),
   dbConfig = require('../database/db-helpers'),
   models = require('../database/models/exports');
 
@@ -32,15 +32,15 @@ app.post('/login', (req, res) => {
     if (!user) {
       return res.json('User does not exist');
     }
-    dbConfig.comparePassword(password, user.password, (err, isMatch) => {
+    dbConfig.comparePassword(password, user.dataValues.password, (err, isMatch) => {
       if (err) throw err;
       if (isMatch) {
-        const token = jwt.sign(user, db.pw, {expiresIn: 2592000000});
+        const token = jwt.sign(user.dataValues, process.env.LOCALSECRET, null, null);
 
         return res.json({success: true, token: token, user:{
-          id: user.id,
-          email: user.email,
-          password: user.password,
+          id: user.dataValues.id,
+          email: user.dataValues.email,
+          password: user.dataValues.password,
         }
         });
       } else {
@@ -68,9 +68,15 @@ app.post('/signup', (req, res) => {
   });
 });
 
-app.get('/dashboard', (req, res) => {});
+app.get('/dashboard', passport.authenticate('jwt', {session: false}), (req, res) => {
+  console.log(req.user);
+  res.json({user: req.user});
+});
 
-app.get('/logout', (req, res) => {});
+app.get('/logout', (req, res) => {
+  req.logout();
+  res.redirect('/');
+});
 
 app.post('/type', (req, res) => {
   let type = req.body;
