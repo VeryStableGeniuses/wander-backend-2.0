@@ -13,7 +13,7 @@ require('../auth/local-auth')(passport);
 
 const getSchedule = require('../scheduleBuilder');
 
-app.use(express.static(`${__dirname}/dist`));
+// app.use(express.static(`${__dirname}/dist`));
 // set morgan to log info about our requests for development
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
   res.json('WANDER app');
 });
 
-app.get('/login', (req, res) => {});
+app.get('/login', (req, res) => { });
 
 app.post('/login', (req, res) => {
   const email = req.body.email;
@@ -50,7 +50,7 @@ app.post('/login', (req, res) => {
   });
 });
 
-app.get('/signup', (req, res) => {});
+app.get('/signup', (req, res) => { });
 
 app.post('/signup', (req, res) => {
   const newUser = new models.User({
@@ -67,9 +67,9 @@ app.post('/signup', (req, res) => {
   });
 });
 
-app.get('/dashboard', (req, res) => {});
+app.get('/dashboard', (req, res) => { });
 
-app.get('/logout', (req, res) => {});
+app.get('/logout', (req, res) => { });
 
 app.post('/type', (req, res) => {
   let type = req.body;
@@ -137,13 +137,15 @@ app.post('/event', (req, res) => {
 
 app.post('/schedule', (req, res) => {
   let schedule = req.body;
-  dbConfig.createSchedule(schedule, (err, newSchedule) => {
-    if (err) {
-      console.error(err);
-    } else {
-      res.send(newSchedule.dataValues);
-    }
-  });
+  console.log('body', schedule);
+  res.status(201).send('found schedule route');
+  // dbConfig.createSchedule(schedule, (err, newSchedule) => {
+  //   if (err) {
+  //     console.error(err);
+  //   } else {
+  //     res.send(newSchedule.dataValues);
+  //   }
+  // });
 });
 
 app.get('/schedule/:sid/events', (req, res) => {
@@ -247,7 +249,7 @@ app.post('/photo', (req, res) => {
 });
 
 // route for handling 404 requests(unavailable routes)
-app.use(function(req, res) {
+app.use(function (req, res) {
   res.status(404).send('Sorry can\'t find that!');
 });
 

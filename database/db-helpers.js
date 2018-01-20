@@ -87,7 +87,13 @@ module.exports = {
   },
 
   getuserByEmail: (email, callback) => {
-    User.findOne({ email: email }, callback);
+    User.findOne({
+      where: { email_address: email }
+    }).then(user => {
+      callback(null, user);
+    }).catch(err => {
+      callback(err);
+    });
   },
 
   updateUser: (user, callback) => {
@@ -234,7 +240,11 @@ module.exports = {
         callback(err);
       });
   },
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> 099f70e843d141d999b1e74a47611117eaf08667
   getScheduleById: (schedule, callback) => {
     Schedule.findById(schedule.id)
       .then(schedule => {
@@ -316,6 +326,16 @@ module.exports = {
   //       callback(err);
   //     });
   // },
+
+  createSchedule: (schedule, callback) => {
+    Schedule.create(schedule, { fields: ['name'] })
+      .then(schedule => {
+        callback(null, schedule);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
 
   addEventSchedule: (event, callback) => {
     EventSchedule.create(event, { fields: ['name'] })

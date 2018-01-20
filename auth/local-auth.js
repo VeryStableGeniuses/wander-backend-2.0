@@ -1,30 +1,25 @@
 require('dotenv').config;
 const JwtStrategy = require('passport-jwt').Strategy,
   ExtractJwt = require('passport-jwt').ExtractJwt,
-  db = require('../database/database'),
+  dbUser= require('../database/models/User'),
   dbConfig = require('../database/db-helpers');
 
-module.exports = function (passport) {
 
-  var opts = {};
-  
-  opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-  opts.secretOrKey = 'stablegenius';
-  // opts.issuer = 'accounts.examplesoft.com';
-  // opts.audience = 'yoursite.net';
-  
-  
-  passport.use(new JwtStrategy(opts, function (jwt_payload, done) {
-    dbConfig.getUserById(jwt_payload._doc._id, function (err, user) {
-      if (err) {
-        return done(err, false);
-      }
-      if (user) {
-        return done(null, user);
-      } else {
+module.exports = function (passport) {
+  passport.use(new JwtStrategy({
+    jwtFromRequest: ExtractJwt.fromHeader('authorization'),
+    secretOrKey: process.env.LOCALSECRET
+  }, (payload, done) => {
+    // console.log('this is payload id ', payload.id);
+    // console.log('this is payload ', payload);
+    try {
+      const user = dbUser.findById(payload.id);
+      if (!user) {
         return done(null, false);
-        // or you could create a new account
       }
-    });
+      done(null, user);
+    } catch (err) {
+      done (err, false);
+    }
   }));
 };

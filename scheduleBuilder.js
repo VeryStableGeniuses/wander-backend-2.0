@@ -159,16 +159,30 @@ const getSchedule = (startDate, endDate, location, interests, cb) => {
   const query = location.split(' ').join('+');
   const config = {
     headers: {
-      'user-key': '0cae7c1f9c26610b03bd4ee152340b02',
+      'user-key': keys.zomato,
     },
   };
-  return Promise.all([
-    axios.get(`https://maps.googleapis.com/maps/api/place/textsearch/json?query=${query}+point+of+interest&language=en&key=${keys.googlePlacesAPI}`),
-    axios.get(`https://developers.zomato.com/api/v2.1/search?q=${query}&sort=rating`, config),
-  ])
-    .then(([restaurants, googlePlaces]) => cb(scheduleBuilder(startDate, endDate, restaurants.data, googlePlaces.data, interests)))
+  let googleData;
+  let restaurantData;
+  axios.get(`https://maps.googleapis.com/maps/api/place/textsearch/json?query=${query}+point+of+interest&language=en&key=${keys.googlePlacesAPI}`)
+    .then(googleResponse => {
+      googleData = googleResponse;
+      axios.get(`https://developers.zomato.com/api/v2.1/search?lat=${googleResponse.data.results[0].geometry.location.lat}&lon=${googleResponse.data.results[0].geometry.location.lng}&sort=rating`, config)
+        .then(restaurantResponse => {
+          restaurantData = restaurantResponse;
+          cb(scheduleBuilder(startDate, endDate, googleData.data, restaurantData.data, interests));
+        })
+        .catch(error => console.error(error));
+    })
     .catch(err => console.error(err));
+  // return Promise.all([
+  //   axios.get(`https://maps.googleapis.com/maps/api/place/textsearch/json?query=${query}+point+of+interest&language=en&key=${keys.googlePlacesAPI}`),
+  //   axios.get(`https://developers.zomato.com/api/v2.1/search?q=${query}&sort=rating`, config),
+  // ])
+  //   .then(([restaurants, googlePlaces]) => cb(scheduleBuilder(startDate, endDate, restaurants.data, googlePlaces.data, interests)))
+  //   .catch(err => console.error(err));
 };
+
 
 
 const start = new Date('February 10, 2018 00:00:00');
@@ -176,6 +190,6 @@ const end = new Date('Febrauary 13, 2018 00:00:00');
 const query = 'New Orleans';
 const interests = ['museum', 'park', 'point_of_interest', 'music'];
 
-getSchedule(start, end, query, interests, (schedule) => console.log(schedule));
+// getSchedule(start, end, query, interests, (schedule) => console.log(schedule));
 
 module.exports.getSchedule = getSchedule;
