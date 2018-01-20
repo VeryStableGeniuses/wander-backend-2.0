@@ -5,7 +5,7 @@ const express = require('express'),
   PORT = process.env.PORT || 3000,
   passport = require('passport'),
   jwt = require('jsonwebtoken'),
-  auth = require('../auth/local-auth'),
+  db = require('../database/database'),
   dbConfig = require('../database/db-helpers'),
   models = require('../database/models/exports');
 
@@ -13,7 +13,7 @@ require('../auth/local-auth')(passport);
 
 const getSchedule = require('../scheduleBuilder');
 
-app.use(express.static(`${__dirname}/dist`));
+// app.use(express.static(`${__dirname}/dist`));
 // set morgan to log info about our requests for development
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -21,39 +21,36 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get('/', (req, res) => {
-  res.json('WANDER App');
+  res.json('WANDER app');
 });
 
-app.get('/login', (req, res) => {});
+app.get('/login', (req, res) => { });
 
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   dbConfig.getuserByEmail(email, (err, user) => {
-    if (err) throw err;
-    if (!user) {
-      return res.json('User does not exist');
+    if (err) {
+      throw err;
     }
-    dbConfig.comparePassword(password, user.dataValues.password, (err, isMatch) => {
-      if (err) throw err;
+    if (!user) {
+      res.json('User does not exist');
+    }
+    dbConfig.comparePassword(password, user.password, (err, isMatch) => {
+      if (err) {
+        throw err;
+      }
       if (isMatch) {
-        const token = jwt.sign(user.dataValues, process.env.LOCALSECRET, null, null);
-
-        return res.json({success: true, token: token, user:{
-          id: user.dataValues.id,
-          email: user.dataValues.email,
-          password: user.dataValues.password,
-        }
-        });
+        const token = jwt.sign(user, db.pw);
+        res.json(`token: ${token}`);
       } else {
-
-        return res.json('Password is incorrect');
+        res.json('Password is incorrect');
       }
     });
   });
 });
 
-app.get('/signup', (req, res) => {});
+app.get('/signup', (req, res) => { });
 
 app.post('/signup', (req, res) => {
   const newUser = new models.User({
@@ -70,15 +67,9 @@ app.post('/signup', (req, res) => {
   });
 });
 
-app.get('/dashboard', passport.authenticate('jwt', {session: false}), (req, res) => {
-  console.log(req.user);
-  res.json({user: req.user});
-});
+app.get('/dashboard', (req, res) => { });
 
-app.get('/logout', (req, res) => {
-  req.logout();
-  res.redirect('/');
-});
+app.get('/logout', (req, res) => { });
 
 app.post('/type', (req, res) => {
   let type = req.body;
@@ -146,13 +137,15 @@ app.post('/event', (req, res) => {
 
 app.post('/schedule', (req, res) => {
   let schedule = req.body;
-  dbConfig.createSchedule(schedule, (err, newSchedule) => {
-    if (err) {
-      console.error(err);
-    } else {
-      res.send(newSchedule.dataValues);
-    }
-  });
+  console.log('body', schedule);
+  res.status(201).send('found schedule route');
+  // dbConfig.createSchedule(schedule, (err, newSchedule) => {
+  //   if (err) {
+  //     console.error(err);
+  //   } else {
+  //     res.send(newSchedule.dataValues);
+  //   }
+  // });
 });
 
 app.get('/schedule/:sid/events', (req, res) => {
@@ -206,7 +199,7 @@ app.post('/user/:uid/eventschedule', (req, res) => {
     const location = req.body.location;
     getSchedule(start, end, location, likes, schedule => {
       for (event in schedule) {
-        dbConfig.addEventSchedule(event, (err, res) => {});
+        dbConfig.addEventSchedule(event, (err, res) => { });
       }
     });
   });
@@ -234,7 +227,7 @@ app.post('/photo', (req, res) => {
 });
 
 // route for handling 404 requests(unavailable routes)
-app.use(function(req, res) {
+app.use(function (req, res) {
   res.status(404).send('Sorry can\'t find that!');
 });
 

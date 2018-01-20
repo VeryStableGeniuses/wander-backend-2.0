@@ -240,17 +240,7 @@ module.exports = {
         callback(err);
       });
   },
-
-  createSchedule: (schedule, callback) => {
-    Schedule.create(schedule, { fields: ['name'] })
-      .then(schedule => {
-        callback(null, schedule);
-      })
-      .catch(err => {
-        callback(err);
-      });
-  },
-
+  
   getScheduleById: (schedule, callback) => {
     Schedule.findById(schedule.id)
       .then(schedule => {
@@ -324,7 +314,17 @@ module.exports = {
   //     });
   // },
 
-  addEventSchedule: (u=event, callback) => {
+  createSchedule: (schedule, callback) => {
+    Schedule.create(schedule, { fields: ['name'] })
+      .then(schedule => {
+        callback(null, schedule);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  addEventSchedule: (event, callback) => {
     EventSchedule.create(event, { fields: ['name'] })
       .then(schedule => {
         callback(null, schedule);
