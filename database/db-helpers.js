@@ -8,7 +8,7 @@ const bcrypt = require('bcrypt-nodejs');
 const sequelize = require('./database');
 require('./associations');
 
-const scheduleBuilder = require('../scheduleBuilder');
+const buildSchedule = require('../scheduleBuilder');
 
 const {
   Type,
@@ -298,8 +298,17 @@ module.exports = {
       });
   },
 
-  createScheduleForUser: () => {
-    scheduleBuilder.getSchedule;
+  createScheduleForUser: (userSchedule, callback) => {
+    buildSchedule.scheduleBuilder()
+      .then(userSchedule => {
+        callback(null, userSchedule);
+      })
+      .then(EventSchedule => {
+        callback(null, EventSchedule);
+      })
+      .catch(err => {
+        callback(err);
+      });
   },
 
   getEventsForSchedule: (sid, callback) => {
