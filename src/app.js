@@ -11,7 +11,9 @@ const express = require('express'),
 
 require('../auth/local-auth')(passport);
 
-app.use(express.static(`${__dirname}/dist`));
+const getSchedule = require('../scheduleBuilder');
+
+// app.use(express.static(`${__dirname}/dist`));
 // set morgan to log info about our requests for development
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -22,7 +24,7 @@ app.get('/', (req, res) => {
   res.json('WANDER app');
 });
 
-app.get('/login', (req, res) => {});
+app.get('/login', (req, res) => { });
 
 app.post('/login', (req, res) => {
   const email = req.body.email;
@@ -48,7 +50,7 @@ app.post('/login', (req, res) => {
   });
 });
 
-app.get('/signup', (req, res) => {});
+app.get('/signup', (req, res) => { });
 
 app.post('/signup', (req, res) => {
   const newUser = new models.User({
@@ -65,9 +67,9 @@ app.post('/signup', (req, res) => {
   });
 });
 
-app.get('/dashboard', (req, res) => {});
+app.get('/dashboard', (req, res) => { });
 
-app.get('/logout', (req, res) => {});
+app.get('/logout', (req, res) => { });
 
 app.post('/type', (req, res) => {
   let type = req.body;
@@ -135,11 +137,35 @@ app.post('/event', (req, res) => {
 
 app.post('/schedule', (req, res) => {
   let schedule = req.body;
-  dbConfig.createSchedule(schedule, (err, newSchedule) => {
+  console.log('body', schedule);
+  res.status(201).send('found schedule route');
+  // dbConfig.createSchedule(schedule, (err, newSchedule) => {
+  //   if (err) {
+  //     console.error(err);
+  //   } else {
+  //     res.send(newSchedule.dataValues);
+  //   }
+  // });
+});
+
+app.get('/schedule/:sid/events', (req, res) => {
+  let sid = req.params.sid;
+  dbConfig.getEventsForSchedule(sid, (err, events) => {
     if (err) {
       console.error(err);
     } else {
-      res.send(newSchedule.dataValues);
+      res.send(events);
+    }
+  });
+});
+
+app.get('/user/:uid/schedule', (req, res) => {
+  let uid = req.params.uid;
+  dbConfig.getSchedulesForUser(uid, (err, schedule) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(schedule);
     }
   });
 });
@@ -151,6 +177,31 @@ app.get('/photos', (req, res) => {
     } else {
       res.send(photos);
     }
+  });
+});
+
+app.post('/user/:uid/eventschedule', (req, res) => {
+  // the body here includes:
+  // uid: the user's id
+  // start: the start time
+  // end: the end time
+  // location: the location
+
+  // const start = new Date('February 10, 2018 00:00:00');
+  // const end = new Date('Febrauary 13, 2018 00:00:00');
+  // const query = 'New Orleans';
+  // const interests = ['museum', 'park', 'point_of_interest', 'music'];
+
+  const uid = req.body.uid;
+  dbConfig.getUserLikes(uid, (err, likes) => {
+    const start = req.body.start;
+    const end = req.body.end;
+    const location = req.body.location;
+    getSchedule(start, end, location, likes, schedule => {
+      for (event in schedule) {
+        dbConfig.addEventSchedule(event, (err, res) => { });
+      }
+    });
   });
 });
 
@@ -176,7 +227,7 @@ app.post('/photo', (req, res) => {
 });
 
 // route for handling 404 requests(unavailable routes)
-app.use(function(req, res) {
+app.use(function (req, res) {
   res.status(404).send('Sorry can\'t find that!');
 });
 

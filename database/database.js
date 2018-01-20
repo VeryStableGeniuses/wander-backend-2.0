@@ -13,7 +13,7 @@ if (process.env.PROD) {
 }
 
 const sequelize = new Sequelize('wander', 'wander', pw, {
-  host: '127.0.0.1',
+  host: 'wander-app.c2xrfwg5wokn.us-east-2.rds.amazonaws.com',
   dialect: 'postgres',
 });
 

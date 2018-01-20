@@ -5,8 +5,10 @@
 
 const bcrypt = require('bcrypt-nodejs');
 
-const sequelize = require('./database');
-require('./associations');
+const sequelize = require('./database'),
+  associations = require('./associations');
+
+// const scheduleBuilder = require('../scheduleBuilder');
 
 const {
   Type,
@@ -232,17 +234,7 @@ module.exports = {
         callback(err);
       });
   },
-
-  createSchedule: (schedule, callback) => {
-    Schedule.create(schedule, { fields: ['name'] })
-      .then(schedule => {
-        callback(null, schedule);
-      })
-      .catch(err => {
-        callback(err);
-      });
-  },
-
+  
   getScheduleById: (schedule, callback) => {
     Schedule.findById(schedule.id)
       .then(schedule => {
@@ -286,16 +278,60 @@ module.exports = {
       });
   },
 
-  getUserSchedule: (user, callback) => {
-    User.findById(user.id)
-      .then(user => {
-        return user.getUserSchedule();
+  getSchedulesForUser: (uid, callback) => {
+    Schedule.findAll({ where: { id_user: uid } })
+      .then(schedules => {
+        return schedules;
       })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  // createScheduleForUser: (userSchedule, callback) => {
+  //   scheduleBuilder
+  //     .getSchedule(
+  //       new Date('February 10, 2018 00:00:00'),
+  //       new Date('Febrauary 13, 2018 00:00:00'),
+  //       'New Orleans',
+  //       ['museum', 'park', 'point_of_interest', 'music'],
+  //       callback
+  //     )
+  //     .then(userSchedule => {
+  //       callback(null, userSchedule);
+  //     })
+  //     .then(EventSchedule => {
+  //       callback(null, EventSchedule);
+  //     })
+  //     .catch(err => {
+  //       callback(err);
+  //     });
+  // },
+
+  createSchedule: (schedule, callback) => {
+    Schedule.create(schedule, { fields: ['name'] })
       .then(schedule => {
-        Schedule.findById(schedule.id);
+        callback(null, schedule);
       })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  addEventSchedule: (event, callback) => {
+    EventSchedule.create(event, { fields: ['name'] })
       .then(schedule => {
-        return schedule.getUserSchedule();
+        callback(null, schedule);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  getEventsForSchedule: (sid, callback) => {
+    EventSchedule.findAll({ where: { id_schedule: sid } })
+      .then(events => {
+        return events;
       })
       .catch(err => {
         callback(err);
