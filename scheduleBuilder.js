@@ -55,7 +55,7 @@ const makeRankings = (googleData, predictHQ, interests, dislikes) => {
       possibilities[0].geometry.location.lat,
       possibilities[0].geometry.location.lng,
       event.geometry.location.lat,
-      event.geometry.location.lng,
+      event.geometry.location.lng
     );
   });
   sortedByDistance = sortedByDistance.sort((a, b) =>
@@ -76,7 +76,7 @@ const findRestaurant = (location, placed, restaurants) => {
       location.geometry.location.lat,
       location.geometry.location.lng,
       Number(restaurant.restaurant.location.latitude),
-      Number(restaurant.restaurant.location.longitude),
+      Number(restaurant.restaurant.location.longitude)
     ));
   const sorted = restaurants.sort((a, b) => a.distanceFromTopRated - b.distanceFromTopRated);
   const result = {

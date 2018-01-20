@@ -5,7 +5,7 @@ const express = require('express'),
   PORT = process.env.PORT || 3000,
   passport = require('passport'),
   jwt = require('jsonwebtoken'),
-  db = require('../database/database'),
+  auth = require('../auth/local-auth'),
   dbConfig = require('../database/db-helpers'),
   models = require('../database/models/exports');
 
@@ -13,7 +13,11 @@ require('../auth/local-auth')(passport);
 
 const getSchedule = require('../scheduleBuilder');
 
+<<<<<<< HEAD
 // app.use(express.static(`${__dirname}/dist`));
+=======
+app.use(express.static(`${__dirname}/dist`));
+>>>>>>> 52dfc6b4605fe2c94d90871e8e7a89183516a028
 // set morgan to log info about our requests for development
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -21,7 +25,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get('/', (req, res) => {
-  res.json('WANDER app');
+  res.json('WANDER App');
 });
 
 app.get('/login', (req, res) => { });
@@ -30,21 +34,24 @@ app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   dbConfig.getuserByEmail(email, (err, user) => {
-    if (err) {
-      throw err;
-    }
+    if (err) throw err;
     if (!user) {
-      res.json('User does not exist');
+      return res.json('User does not exist');
     }
-    dbConfig.comparePassword(password, user.password, (err, isMatch) => {
-      if (err) {
-        throw err;
-      }
+    dbConfig.comparePassword(password, user.dataValues.password, (err, isMatch) => {
+      if (err) throw err;
       if (isMatch) {
-        const token = jwt.sign(user, db.pw);
-        res.json(`token: ${token}`);
+        const token = jwt.sign(user.dataValues, process.env.LOCALSECRET, null, null);
+
+        return res.json({success: true, token: token, user:{
+          id: user.dataValues.id,
+          email: user.dataValues.email,
+          password: user.dataValues.password,
+        }
+        });
       } else {
-        res.json('Password is incorrect');
+
+        return res.json('Password is incorrect');
       }
     });
   });
@@ -67,9 +74,21 @@ app.post('/signup', (req, res) => {
   });
 });
 
+<<<<<<< HEAD
 app.get('/dashboard', (req, res) => { });
 
 app.get('/logout', (req, res) => { });
+=======
+app.get('/dashboard', passport.authenticate('jwt', {session: false}), (req, res) => {
+  console.log(req.user);
+  res.json({user: req.user});
+});
+
+app.get('/logout', (req, res) => {
+  req.logout();
+  res.redirect('/');
+});
+>>>>>>> 52dfc6b4605fe2c94d90871e8e7a89183516a028
 
 app.post('/type', (req, res) => {
   let type = req.body;
@@ -170,6 +189,28 @@ app.get('/user/:uid/schedule', (req, res) => {
   });
 });
 
+app.get('/schedule/:sid/events', (req, res) => {
+  let sid = req.params.sid;
+  dbConfig.getEventsForSchedule(sid, (err, events) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(events);
+    }
+  });
+});
+
+app.get('/user/:uid/schedule', (req, res) => {
+  let uid = req.params.uid;
+  dbConfig.getSchedulesForUser(uid, (err, schedule) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.send(schedule);
+    }
+  });
+});
+
 app.get('/photos', (req, res) => {
   dbConfig.getPhotos((err, photos) => {
     if (err) {
@@ -199,7 +240,11 @@ app.post('/user/:uid/eventschedule', (req, res) => {
     const location = req.body.location;
     getSchedule(start, end, location, likes, schedule => {
       for (event in schedule) {
+<<<<<<< HEAD
         dbConfig.addEventSchedule(event, (err, res) => { });
+=======
+        dbConfig.addEventSchedule(event, (err, res) => {});
+>>>>>>> 52dfc6b4605fe2c94d90871e8e7a89183516a028
       }
     });
   });
