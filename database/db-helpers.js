@@ -314,13 +314,8 @@ module.exports = {
   //     });
   // },
 
-<<<<<<< HEAD
   createSchedule: (schedule, callback) => {
     Schedule.create(schedule, { fields: ['name'] })
-=======
-  addEventSchedule: (u=event, callback) => {
-    EventSchedule.create(event, { fields: ['name'] })
->>>>>>> 52dfc6b4605fe2c94d90871e8e7a89183516a028
       .then(schedule => {
         callback(null, schedule);
       })
@@ -329,7 +324,6 @@ module.exports = {
       });
   },
 
-<<<<<<< HEAD
   addEventSchedule: (event, callback) => {
     EventSchedule.create(event, { fields: ['name'] })
       .then(schedule => {
@@ -340,8 +334,6 @@ module.exports = {
       });
   },
 
-=======
->>>>>>> 52dfc6b4605fe2c94d90871e8e7a89183516a028
   getEventsForSchedule: (sid, callback) => {
     EventSchedule.findAll({ where: { id_schedule: sid } })
       .then(events => {
