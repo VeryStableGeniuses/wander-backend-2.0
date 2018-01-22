@@ -28,7 +28,8 @@ app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   dbConfig.getuserByEmail(email, (err, user) => {
-    console.log(user.dataValues); // The dataValues object contains the fields from the database. This is what we need
+    //console.log(user);
+    //console.log(user.dataValues); // The dataValues object contains the fields from the database. This is what we need
     if (err) {
       throw err;
     }
@@ -44,7 +45,7 @@ app.post('/login', (req, res) => {
         }
         if (isMatch) {
           const token = jwt.sign(user.dataValues, process.env.LOCALSECRET);
-          res.json(`token: ${token}`);
+          res.json(`{token: ${token}, id: ${user.id}}`);
         } else {
           res.json('Password is incorrect');
         }
@@ -68,8 +69,16 @@ app.post('/signup', (req, res) => {
   });
 });
 
-app.get('/dashboard', (req, res) => {
+app.get('/dashboard/:uid', (req, res) => {
   // route on dashboard that'll get all schedules tied to a user
+  let uid = req.params.uid;
+  dbConfig.getSchedulesForUser(uid, (err, schedules) => {
+    if (err) {
+      res.json('Error getting schedules ', err);
+    } else {
+      res.status(200).send(schedules);
+    }
+  });
 });
 
 // app.post('/logout', (req, res) => {});

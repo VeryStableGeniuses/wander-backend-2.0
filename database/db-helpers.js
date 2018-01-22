@@ -290,7 +290,7 @@ module.exports = {
   getSchedulesForUser: (uid, callback) => {
     Schedule.findAll({ where: { id_user: uid } })
       .then(schedules => {
-        return schedules;
+        callback(null, schedules);
       })
       .catch(err => {
         callback(err);
