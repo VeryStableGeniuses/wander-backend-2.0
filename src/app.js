@@ -91,7 +91,7 @@ app.post('/type', (req, res) => {
   let type = req.body;
   dbConfig.addType(type, (err, type) => {
     if (err) {
-      console.error(err);
+      res.send(err);
     } else {
       res.status(201).send(type);
     }
@@ -101,7 +101,7 @@ app.post('/type', (req, res) => {
 app.get('/types', (req, res) => {
   dbConfig.getTypes((err, types) => {
     if (err) {
-      console.error(err);
+      res.send(err);
     } else {
       res.status(200).send(types);
     }
@@ -111,7 +111,7 @@ app.get('/types', (req, res) => {
 app.get('/users', (req, res) => {
   dbConfig.getUsers((err, users) => {
     if (err) {
-      console.error(err);
+      res.send(err);
     } else {
       res.status(200).send(users);
     }
@@ -122,7 +122,7 @@ app.get('/user/:uid/likes', (req, res) => {
   let userId = req.params.uid;
   dbConfig.getUserLikes(userId, (err, likes) => {
     if (err) {
-      console.error(err);
+      res.send(err);
     } else {
       res.status(200).send(likes);
     }
@@ -133,9 +133,30 @@ app.post('/user_like', (req, res) => {
   let userLike = req.body;
   dbConfig.addUserLike(userLike, (err, userLike) => {
     if (err) {
-      console.error(err);
+      res.send(err);
     } else {
       res.status(201).send(userLike);
+    }
+  });
+});
+
+app.get('/events', (req, res) => {
+  dbConfig.getEvents((err, events) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.status(200).send(events);
+    }
+  });
+});
+
+app.get('event', (req, res) => {
+  let eventId = req.params.eid;
+  dbConfig.getEventById(eventId, (err, event) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.status(200).send(event);
     }
   });
 });
@@ -144,7 +165,7 @@ app.post('/event', (req, res) => {
   let event = req.body;
   dbConfig.addEvent(event, (err, newEvent) => {
     if (err) {
-      console.error(err);
+      res.send(err);
     } else {
       res.status(201).send(newEvent);
     }
@@ -155,7 +176,7 @@ app.get('/:sid/schedules', (req, res) => {
   let scheduleId = req.params.sid;
   dbConfig.getEventsForSchedule(scheduleId, (err, events) => {
     if (err) {
-      console.error(err);
+      res.send(err);
     } else {
       res.status(200).send(events);
     }
@@ -170,7 +191,7 @@ app.post('/schedule', (req, res) => {
   let schedule = req.body;
   dbConfig.createSchedule(schedule, (err, newSchedule) => {
     if (err) {
-      console.error(err);
+      res.send(err);
     } else {
       res.status(201).send(newSchedule);
     }
@@ -181,7 +202,7 @@ app.get('/schedule/:sid/events', (req, res) => {
   let sid = req.params.sid;
   dbConfig.getEventsForSchedule(sid, (err, events) => {
     if (err) {
-      console.error(err);
+      res.send(err);
     } else {
       res.status(200).send(events);
     }
@@ -192,19 +213,9 @@ app.get('/user/:uid/schedule', (req, res) => {
   let uid = req.params.uid;
   dbConfig.getSchedulesForUser(uid, (err, schedule) => {
     if (err) {
-      console.error(err);
+      res.send(err);
     } else {
       res.status(200).send(schedule);
-    }
-  });
-});
-
-app.get('/photos', (req, res) => {
-  dbConfig.getPhotos((err, photos) => {
-    if (err) {
-      console.error(err);
-    } else {
-      res.status(200).send(photos);
     }
   });
 });
@@ -219,7 +230,7 @@ app.post('/user/:uid/event_schedule', (req, res) => {
       for (let event in schedule) {
         dbConfig.createSchedule(event, (err, newSchedule) => {
           if (err) {
-            console.error(err);
+            res.send(err);
           } else {
             res.status(201).send(newSchedule);
           }
@@ -231,7 +242,7 @@ app.post('/user/:uid/event_schedule', (req, res) => {
 
 app.delete('event_schedule', (req, res) => {
   const eventSchedule = req.body;
-  dbConfig.deletescheduledEvent(eventSchedule, (err) => {
+  dbConfig.deletescheduledEvent(eventSchedule, err => {
     if (err) {
       res.send(err);
     } else {
@@ -255,6 +266,15 @@ app.delete('event_schedule', (req, res) => {
 //   }
 // }
 
+app.get('/photos', (req, res) => {
+  dbConfig.getPhotos((err, photos) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.status(200).send(photos);
+    }
+  });
+});
 // app.get('/photo', (req, res) => {
 //   dbConfig.getPhotoById((err, photo) => {
 //     if (err) {
@@ -269,7 +289,7 @@ app.post('/photo', (req, res) => {
   let photo = req.body;
   dbConfig.addPhoto(photo, (err, newPhoto) => {
     if (err) {
-      console.error(err);
+      res.send(err);
     } else {
       res.status(201).send(newPhoto.dataValues);
     }

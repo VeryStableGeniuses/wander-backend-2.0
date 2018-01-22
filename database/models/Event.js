@@ -4,7 +4,8 @@ const sequelize = require('../database');
 // define Event
 const Event = sequelize.define('event', {
   location: Sequelize.FLOAT,
-  name: Sequelize.STRING
+  name: Sequelize.STRING,
+  googleId: Sequelize.STRING
 });
 
 module.exports = Event;
