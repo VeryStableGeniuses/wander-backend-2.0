@@ -286,6 +286,7 @@ module.exports = {
       });
   },
 
+  // app.get('/schedules')
   getSchedulesForUser: (uid, callback) => {
     Schedule.findAll({ where: { id_user: uid } })
       .then(schedules => {
@@ -337,7 +338,7 @@ module.exports = {
 
   addEventSchedule: (event, callback) => {
     console.log('before EventSchedule.create in addEventSchedule', event);
-    EventSchedule.create(event, { fields: ['name'] })
+    EventSchedule.create(event, { fields: ['name', 'id_event', 'id_schedule' ] })
       .then(schedule => {
         callback(null, schedule);
       })
@@ -348,7 +349,7 @@ module.exports = {
 
   createSchedule: (schedule, addEventSchedule, callback) => {
     console.log('before Schedule.create in createSchedule', schedule);
-    Schedule.create(schedule, { fields: ['name'] })
+    Schedule.create(schedule, { fields: ['name', 'id_user'] })
       .then(schedule => {
         addEventSchedule(null, schedule);
       })
@@ -359,8 +360,9 @@ module.exports = {
 
   getEventsForSchedule: (sid, callback) => {
     EventSchedule.findAll({ where: { id_schedule: sid } })
+    // EventSchedule.findAll()
       .then(events => {
-        return events;
+        callback(null, events);
       })
       .catch(err => {
         callback(err);
