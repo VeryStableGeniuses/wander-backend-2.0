@@ -89,11 +89,13 @@ module.exports = {
   getuserByEmail: (email, callback) => {
     User.findOne({
       where: { email_address: email }
-    }).then(user => {
-      callback(null, user);
-    }).catch(err => {
-      callback(err);
-    });
+    })
+      .then(user => {
+        callback(null, user);
+      })
+      .catch(err => {
+        callback(err);
+      });
   },
 
   updateUser: (user, callback) => {
@@ -240,7 +242,7 @@ module.exports = {
         callback(err);
       });
   },
-  
+
   getScheduleById: (schedule, callback) => {
     Schedule.findById(schedule.id)
       .then(schedule => {
@@ -284,6 +286,7 @@ module.exports = {
       });
   },
 
+  // app.get('/schedules')
   getSchedulesForUser: (uid, callback) => {
     Schedule.findAll({ where: { id_user: uid } })
       .then(schedules => {
@@ -313,9 +316,29 @@ module.exports = {
   //       callback(err);
   //     });
   // },
+  // createSchedule: (schedule, callback) => {
+  //   Schedule.create(schedule, { fields: ['name'] })
+  //     .then(schedule => {
+  //       callback(null, schedule);
+  //     })
+  //     .catch(err => {
+  //       callback(err);
+  //     });
+  // },
 
-  createSchedule: (schedule, callback) => {
-    Schedule.create(schedule, { fields: ['name'] })
+  // createSchedule: (schedule, callback) => {
+  //   Schedule.create(schedule, { fields: ['name'] })
+  //     .then(schedule => {
+  //       callback(null, schedule);
+  //     })
+  //     .catch(err => {
+  //       callback(err);
+  //     });
+  // },
+
+  addEventSchedule: (event, callback) => {
+    console.log('before EventSchedule.create in addEventSchedule', event);
+    EventSchedule.create(event, { fields: ['name', 'id_event', 'id_schedule' ] })
       .then(schedule => {
         callback(null, schedule);
       })
@@ -324,10 +347,11 @@ module.exports = {
       });
   },
 
-  addEventSchedule: (event, callback) => {
-    EventSchedule.create(event, { fields: ['name'] })
+  createSchedule: (schedule, addEventSchedule, callback) => {
+    console.log('before Schedule.create in createSchedule', schedule);
+    Schedule.create(schedule, { fields: ['name', 'id_user'] })
       .then(schedule => {
-        callback(null, schedule);
+        addEventSchedule(null, schedule);
       })
       .catch(err => {
         callback(err);
@@ -336,8 +360,9 @@ module.exports = {
 
   getEventsForSchedule: (sid, callback) => {
     EventSchedule.findAll({ where: { id_schedule: sid } })
+    // EventSchedule.findAll()
       .then(events => {
-        return events;
+        callback(null, events);
       })
       .catch(err => {
         callback(err);
