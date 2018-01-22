@@ -81,6 +81,10 @@ app.get('/dashboard/:uid', (req, res) => {
   });
 });
 
+app.get('/logout', (req, res) => {
+  res.json('You are logged out');
+});
+
 // app.post('/logout', (req, res) => {});
 
 app.post('/type', (req, res) => {
