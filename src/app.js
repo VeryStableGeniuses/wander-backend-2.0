@@ -120,7 +120,7 @@ app.get('/user/:uid/likes', (req, res) => {
     if (err) {
       console.error(err);
     } else {
-      res.send(likes);
+      res.status(200).send(likes);
     }
   });
 });
@@ -131,7 +131,7 @@ app.post('/user_like', (req, res) => {
     if (err) {
       console.error(err);
     } else {
-      res.send(userLike.dataValues);
+      res.status(201).send(userLike);
     }
   });
 });
@@ -142,7 +142,7 @@ app.post('/event', (req, res) => {
     if (err) {
       console.error(err);
     } else {
-      res.status(201).send(newEvent.dataValues);
+      res.status(201).send(newEvent);
     }
   });
 });
@@ -168,7 +168,7 @@ app.post('/schedule', (req, res) => {
     if (err) {
       console.error(err);
     } else {
-      res.status(201).send(newSchedule.dataValues);
+      res.status(201).send(newSchedule);
     }
   });
 });
@@ -200,18 +200,12 @@ app.get('/photos', (req, res) => {
     if (err) {
       console.error(err);
     } else {
-      res.send(photos);
+      res.status(200).send(photos);
     }
   });
 });
 
 app.post('/user/:uid/event_schedule', (req, res) => {
-
-  // const start = new Date('February 10, 2018 00:00:00');
-  // const end = new Date('Febrauary 13, 2018 00:00:00');
-  // const query = 'New Orleans';
-  // const interests = ['museum', 'park', 'point_of_interest', 'music'];
-
   let uid = req.body.userId;
   dbConfig.getUserLikes(uid, (err, likes) => {
     let startDate = req.body.startDate;
@@ -247,7 +241,7 @@ app.post('/photo', (req, res) => {
     if (err) {
       console.error(err);
     } else {
-      res.send(newPhoto.dataValues);
+      res.status(201).send(newPhoto.dataValues);
     }
   });
 });
