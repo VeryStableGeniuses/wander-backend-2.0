@@ -93,7 +93,7 @@ app.post('/type', (req, res) => {
     if (err) {
       console.error(err);
     } else {
-      res.send(type);
+      res.status(201).send(type);
     }
   });
 });
@@ -103,7 +103,7 @@ app.get('/types', (req, res) => {
     if (err) {
       console.error(err);
     } else {
-      res.send(types);
+      res.status(200).send(types);
     }
   });
 });
@@ -113,7 +113,7 @@ app.get('/users', (req, res) => {
     if (err) {
       console.error(err);
     } else {
-      res.send(users);
+      res.status(200).send(users);
     }
   });
 });
@@ -221,13 +221,39 @@ app.post('/user/:uid/event_schedule', (req, res) => {
           if (err) {
             console.error(err);
           } else {
-            res.send(newSchedule.dataValues);
+            res.status(201).send(newSchedule);
           }
         });
       }
     });
   });
 });
+
+app.delete('event_schedule', (req, res) => {
+  const eventSchedule = req.body;
+  dbConfig.deletescheduledEvent(eventSchedule, (err) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send('deleted scheduled Event');
+    }
+  });
+});
+// app.delete('/trigger', util.deleteTrigger);
+// deleteTrigger: function (req, res) {
+//   if (req.session.user && req.cookies.user_sid) {
+//     const trigger = req.body;
+//     db.deleteTrigger(trigger, (err) => {
+//       if (err) {
+//         res.send(err);
+//       } else {
+//         res.send('deleted trigger');
+//       }
+//     });
+//   } else {
+//     res.send(401, 'unauthorized request');
+//   }
+// }
 
 // app.get('/photo', (req, res) => {
 //   dbConfig.getPhotoById((err, photo) => {
