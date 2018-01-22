@@ -28,7 +28,8 @@ app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   dbConfig.getuserByEmail(email, (err, user) => {
-    console.log(user.dataValues); // The dataValues object contains the fields from the database. This is what we need
+    //console.log(user);
+    //console.log(user.dataValues); // The dataValues object contains the fields from the database. This is what we need
     if (err) {
       throw err;
     }
@@ -44,7 +45,7 @@ app.post('/login', (req, res) => {
         }
         if (isMatch) {
           const token = jwt.sign(user.dataValues, process.env.LOCALSECRET);
-          res.json(`token: ${token}`);
+          res.json(`{token: ${token}, id: ${user.id}}`);
         } else {
           res.json('Password is incorrect');
         }
@@ -68,8 +69,20 @@ app.post('/signup', (req, res) => {
   });
 });
 
-app.get('/dashboard', (req, res) => {
+app.get('/dashboard/:uid', (req, res) => {
   // route on dashboard that'll get all schedules tied to a user
+  let uid = req.params.uid;
+  dbConfig.getSchedulesForUser(uid, (err, schedules) => {
+    if (err) {
+      res.json('Error getting schedules ', err);
+    } else {
+      res.status(200).send(schedules);
+    }
+  });
+});
+
+app.get('/logout', (req, res) => {
+  res.json('You are logged out');
 });
 
 // app.post('/logout', (req, res) => {});
@@ -111,7 +124,7 @@ app.get('/user/:uid/likes', (req, res) => {
     if (err) {
       console.error(err);
     } else {
-      res.send(likes);
+      res.status(200).send(likes);
     }
   });
 });
@@ -122,7 +135,7 @@ app.post('/user_like', (req, res) => {
     if (err) {
       console.error(err);
     } else {
-      res.send(userLike.dataValues);
+      res.status(201).send(userLike);
     }
   });
 });
@@ -133,7 +146,7 @@ app.post('/event', (req, res) => {
     if (err) {
       console.error(err);
     } else {
-      res.status(201).send(newEvent.dataValues);
+      res.status(201).send(newEvent);
     }
   });
 });
@@ -159,7 +172,7 @@ app.post('/schedule', (req, res) => {
     if (err) {
       console.error(err);
     } else {
-      res.status(201).send(newSchedule.dataValues);
+      res.status(201).send(newSchedule);
     }
   });
 });
@@ -191,18 +204,12 @@ app.get('/photos', (req, res) => {
     if (err) {
       console.error(err);
     } else {
-      res.send(photos);
+      res.status(200).send(photos);
     }
   });
 });
 
 app.post('/user/:uid/event_schedule', (req, res) => {
-
-  // const start = new Date('February 10, 2018 00:00:00');
-  // const end = new Date('Febrauary 13, 2018 00:00:00');
-  // const query = 'New Orleans';
-  // const interests = ['museum', 'park', 'point_of_interest', 'music'];
-
   let uid = req.body.userId;
   dbConfig.getUserLikes(uid, (err, likes) => {
     let startDate = req.body.startDate;
@@ -238,7 +245,7 @@ app.post('/photo', (req, res) => {
     if (err) {
       console.error(err);
     } else {
-      res.send(newPhoto.dataValues);
+      res.status(201).send(newPhoto.dataValues);
     }
   });
 });
