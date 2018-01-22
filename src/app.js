@@ -25,6 +25,7 @@ app.get('/', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
+  console.log('login hit');
   const email = req.body.email;
   const password = req.body.password;
   dbConfig.getuserByEmail(email, (err, user) => {
@@ -44,7 +45,7 @@ app.post('/login', (req, res) => {
         }
         if (isMatch) {
           const token = jwt.sign(user.dataValues, process.env.LOCALSECRET);
-          res.json(`token: ${token}`);
+          res.json(`token: ${token}`, user.dataValues.id);
         } else {
           res.json('Password is incorrect');
         }
@@ -63,7 +64,8 @@ app.post('/signup', (req, res) => {
     if (err) {
       res.json('User was not created ', err);
     } else {
-      return res.json('User created');
+      console.log(user);
+      return res.json('User created', user.dataValues);
     }
   });
 });
@@ -201,25 +203,25 @@ app.post('/user/:uid/event_schedule', (req, res) => {
   // const start = new Date('February 10, 2018 00:00:00');
   // const end = new Date('Febrauary 13, 2018 00:00:00');
   // const query = 'New Orleans';
-  // const interests = ['museum', 'park', 'point_of_interest', 'music'];
+  const interests = ['museum', 'park', 'point_of_interest', 'music'];
 
   let uid = req.body.userId;
-  dbConfig.getUserLikes(uid, (err, likes) => {
-    let startDate = req.body.startDate;
-    let endDate = req.body.endDate;
-    let location = req.body.location;
-    getSchedule(startDate, endDate, location, likes, schedule => {
-      for (let event in schedule) {
-        dbConfig.createSchedule(event, (err, newSchedule) => {
-          if (err) {
-            console.error(err);
-          } else {
-            res.send(newSchedule.dataValues);
-          }
-        });
-      }
-    });
+  // dbConfig.getUserLikes(uid, (err, likes) => {
+  let startDate = req.body.startDate;
+  let endDate = req.body.endDate;
+  let location = req.body.location;
+  getSchedule(startDate, endDate, location, interests, (schedule) => {
+    for (let event in schedule) {
+      dbConfig.createSchedule(event, (err, newSchedule) => {
+        if (err) {
+          console.error(err);
+        } else {
+          res.send(newSchedule.dataValues);
+        }
+      });
+    }
   });
+  // });
 });
 
 // app.get('/photo', (req, res) => {

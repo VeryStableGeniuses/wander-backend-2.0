@@ -116,35 +116,34 @@ const fillDay = (day, rankedList, interests, currentDay, restaurants) => {
 
 // Here's where the magic happens
 const scheduleBuilder = (startDate, endDate, google, restaurantData, interests) => {
-  // Get the user's interests and dislikes, store them in arrays
   
   const dislikes = ['aquarium', 'casino'];
   startDate = new Date(startDate);
   endDate = new Date(endDate);
   // Figure out what the current day of the week is to check if it's open then
   let currentDay = startDate.getDay();
-
+  
   let currentDate = startDate;
   // startDate = 0;
-
+  
   // Initialize the empty schedule object
   const schedule = {};
-
+  
   // Get the total number of days that the user will be in the destination
   const numberOfDays =
-    Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-
+  Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  
   // Fill the schedule with "day" objects
   for (let i = 1; i < numberOfDays + 2; i += 1) {
     schedule[`day_${i}`] = {};
   }
-
+  
   // This is just here so that the function can actually run
   const predictHQPlaceHolder = true;
-
+  
   // Make the ranked list
   const sortedAndRated = makeRankings(google, predictHQPlaceHolder, interests, dislikes);
-
+  
   // Go through each day, fill it out with events
   const days = Object.keys(schedule);
   days.forEach((day) => {
