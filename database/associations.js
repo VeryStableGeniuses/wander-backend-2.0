@@ -24,6 +24,9 @@ Type.hasMany(Event, { foreignKey: 'id_type' });
 EventSchedule.belongsTo(Event, { foreignKey: 'id_event' });
 Event.hasMany(EventSchedule, { foreignKey: 'id_event' });
 
+EventSchedule.belongsTo(Schedule, { foreignKey: 'id_schedule'});
+Schedule.hasMany(EventSchedule, { foreignKey: 'id_schedule'});
+
 Schedule.belongsTo(User, { foreignKey: 'id_user' });
 User.hasMany(Schedule, { foreignKey: 'id_user' });
 

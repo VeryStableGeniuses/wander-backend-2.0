@@ -11,7 +11,7 @@ const express = require('express'),
 
 require('../auth/local-auth')(passport);
 
-const getSchedule = require('../scheduleBuilder');
+const { getSchedule } = require('../scheduleBuilder');
 
 // app.use(express.static(`${__dirname}/dist`));
 // set morgan to log info about our requests for development
@@ -35,18 +35,21 @@ app.post('/login', (req, res) => {
     if (!user) {
       res.json('User does not exist');
     }
-    dbConfig.comparePassword(password, user.dataValues.password, (err, isMatch) => {
-      if (err) {
-        throw err;
+    dbConfig.comparePassword(
+      password,
+      user.dataValues.password,
+      (err, isMatch) => {
+        if (err) {
+          throw err;
+        }
+        if (isMatch) {
+          const token = jwt.sign(user.dataValues, process.env.LOCALSECRET);
+          res.json(`token: ${token}`);
+        } else {
+          res.json('Password is incorrect');
+        }
       }
-      if (isMatch) {
-      
-        const token = jwt.sign(user.dataValues, process.env.LOCALSECRET);
-        res.json(`token: ${token}`);
-      } else {
-        res.json('Password is incorrect');
-      }
-    });
+    );
   });
 });
 
@@ -65,9 +68,11 @@ app.post('/signup', (req, res) => {
   });
 });
 
-app.get('/dashboard', (req, res) => { });
+app.get('/dashboard', (req, res) => {
+  // route on dashboard that'll get all schedules tied to a user
+});
 
-app.post('/logout', (req, res) => { });
+// app.post('/logout', (req, res) => {});
 
 app.post('/type', (req, res) => {
   let type = req.body;
@@ -128,22 +133,35 @@ app.post('/event', (req, res) => {
     if (err) {
       console.error(err);
     } else {
-      res.send(newEvent.dataValues);
+      res.status(201).send(newEvent.dataValues);
     }
   });
 });
 
+app.get('/:sid/schedules', (req, res) => {
+  let scheduleId = req.params.sid;
+  dbConfig.getEventsForSchedule(scheduleId, (err, events) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.status(200).send(events);
+    }
+  });
+});
+
+// when you receive schedule, get all events tied to that schedule
+// logout
+// create Schedule, scheduled events, etc. based on user_likes
+
 app.post('/schedule', (req, res) => {
   let schedule = req.body;
-  console.log('body', schedule);
-  res.status(201).send('found schedule route');
-  // dbConfig.createSchedule(schedule, (err, newSchedule) => {
-  //   if (err) {
-  //     console.error(err);
-  //   } else {
-  //     res.send(newSchedule.dataValues);
-  //   }
-  // });
+  dbConfig.createSchedule(schedule, (err, newSchedule) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.status(201).send(newSchedule.dataValues);
+    }
+  });
 });
 
 app.get('/schedule/:sid/events', (req, res) => {
@@ -152,7 +170,7 @@ app.get('/schedule/:sid/events', (req, res) => {
     if (err) {
       console.error(err);
     } else {
-      res.send(events);
+      res.status(200).send(events);
     }
   });
 });
@@ -163,7 +181,7 @@ app.get('/user/:uid/schedule', (req, res) => {
     if (err) {
       console.error(err);
     } else {
-      res.send(schedule);
+      res.status(200).send(schedule);
     }
   });
 });
@@ -178,26 +196,27 @@ app.get('/photos', (req, res) => {
   });
 });
 
-app.post('/user/:uid/eventschedule', (req, res) => {
-  // the body here includes:
-  // uid: the user's id
-  // start: the start time
-  // end: the end time
-  // location: the location
+app.post('/user/:uid/event_schedule', (req, res) => {
 
   // const start = new Date('February 10, 2018 00:00:00');
   // const end = new Date('Febrauary 13, 2018 00:00:00');
   // const query = 'New Orleans';
   // const interests = ['museum', 'park', 'point_of_interest', 'music'];
 
-  const uid = req.body.uid;
+  let uid = req.body.userId;
   dbConfig.getUserLikes(uid, (err, likes) => {
-    const start = req.body.start;
-    const end = req.body.end;
-    const location = req.body.location;
-    getSchedule(start, end, location, likes, schedule => {
-      for (event in schedule) {
-        dbConfig.addEventSchedule(event, (err, res) => { });
+    let startDate = req.body.startDate;
+    let endDate = req.body.endDate;
+    let location = req.body.location;
+    getSchedule(startDate, endDate, location, likes, schedule => {
+      for (let event in schedule) {
+        dbConfig.createSchedule(event, (err, newSchedule) => {
+          if (err) {
+            console.error(err);
+          } else {
+            res.send(newSchedule.dataValues);
+          }
+        });
       }
     });
   });
@@ -225,7 +244,7 @@ app.post('/photo', (req, res) => {
 });
 
 // route for handling 404 requests(unavailable routes)
-app.use(function (req, res) {
+app.use(function(req, res) {
   res.status(404).send('Sorry can\'t find that!');
 });
 
