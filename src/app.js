@@ -72,7 +72,9 @@ app.get('/dashboard', (req, res) => {
   // route on dashboard that'll get all schedules tied to a user
 });
 
-// app.post('/logout', (req, res) => {});
+app.get('/logout', (req, res) => {
+  res.json('You are logged out');
+});
 
 app.post('/type', (req, res) => {
   let type = req.body;
