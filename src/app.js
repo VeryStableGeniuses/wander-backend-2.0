@@ -24,8 +24,6 @@ app.get('/', (req, res) => {
   res.json('WANDER app');
 });
 
-app.get('/login', (req, res) => { });
-
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -52,8 +50,6 @@ app.post('/login', (req, res) => {
   });
 });
 
-app.get('/signup', (req, res) => { });
-
 app.post('/signup', (req, res) => {
   const newUser = new models.User({
     name: req.body.username,
@@ -62,7 +58,7 @@ app.post('/signup', (req, res) => {
   });
   dbConfig.createUser(newUser, (err, user) => {
     if (err) {
-      res.json('User was not created ', err);
+      res.json('User was not created');
     } else {
       return res.json('User created');
     }
@@ -71,7 +67,7 @@ app.post('/signup', (req, res) => {
 
 app.get('/dashboard', (req, res) => { });
 
-app.get('/logout', (req, res) => { });
+app.post('/logout', (req, res) => { });
 
 app.post('/type', (req, res) => {
   let type = req.body;
