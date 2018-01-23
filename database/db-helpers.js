@@ -341,11 +341,7 @@ module.exports = {
   },
 
   createSchedule: (schedule, callback) => {
-<<<<<<< HEAD
     Schedule.create(schedule, { fields: ['name'] })
-=======
-    Schedule.create(schedule, { fields: ['name', 'id_user'] })
->>>>>>> c911ab275dabc9d6a82df8e9cda28373d7f23623
       .then(schedule => {
         callback(null, schedule);
       })

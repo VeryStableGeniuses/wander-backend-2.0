@@ -306,7 +306,6 @@ app.post('/user/event_schedule', (req, res) => {
     });
   });
 });
-<<<<<<< HEAD
 
 app.delete('event_schedule', (req, res) => {
   const eventSchedule = req.body;
@@ -328,8 +327,6 @@ app.get('/photos', (req, res) => {
     }
   });
 });
-=======
->>>>>>> c911ab275dabc9d6a82df8e9cda28373d7f23623
 // app.get('/photo', (req, res) => {
 //   dbConfig.getPhotoById((err, photo) => {
 //     if (err) {
