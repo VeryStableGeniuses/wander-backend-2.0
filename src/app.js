@@ -184,7 +184,6 @@ app.get('/:sid/schedules', (req, res) => {
 });
 
 // when you receive schedule, get all events tied to that schedule
-// logout
 // create Schedule, scheduled events, etc. based on user_likes
 
 app.post('/schedule', (req, res) => {
@@ -220,22 +219,92 @@ app.get('/user/:uid/schedule', (req, res) => {
   });
 });
 
-app.post('/user/:uid/event_schedule', (req, res) => {
-  let uid = req.body.userId;
-  dbConfig.getUserLikes(uid, (err, likes) => {
-    let startDate = req.body.startDate;
-    let endDate = req.body.endDate;
-    let location = req.body.location;
-    getSchedule(startDate, endDate, location, likes, schedule => {
-      for (let event in schedule) {
-        dbConfig.createSchedule(event, (err, newSchedule) => {
-          if (err) {
-            res.send(err);
-          } else {
-            res.status(201).send(newSchedule);
-          }
+// app.post('/user/:uid/event_schedule', (req, res) => {
+//   let uid = req.body.userId;
+//   dbConfig.getUserLikes(uid, (err, likes) => {
+//     let startDate = req.body.startDate;
+//     let endDate = req.body.endDate;
+//     let location = req.body.location;
+//     getSchedule(startDate, endDate, location, likes, schedule => {
+//       // Object.keys(schedule)
+//       // map over keys array -->
+//       // Promise.all([array of async functions])
+//       // .then(results of async functions)
+//       // const events = Object.keys(schedule);
+//       // events.map(event => {
+//       //   return Promise.all([dbConfig.createSchedule(event, (err, newSchedule) => {
+
+//       //   })])
+//       // })
+//       for (let event in schedule) {
+//         dbConfig.createSchedule(event, (err, newSchedule) => {
+//           if (err) {
+//             res.send(err);
+//           } else {
+//             res.status(201).send(newSchedule);
+//           }
+//         });
+//       }
+//     });
+//   });
+// });
+
+function generateEventsForSchedule(userSchedule, schedule) {
+  // console.log(schedule);
+  let days = Object.keys(schedule);
+  days.forEach(day => {
+    let events = Object.keys(schedule[day]);
+    events.forEach(eventKey => {
+      if (eventKey !== 'date') {
+        let eventName = schedule[day][eventKey].name;
+        let eventLocation = schedule[day][eventKey].location;
+        let event = {
+          name: eventName,
+          latitude: eventLocation.latitude,
+          longitude: eventLocation.longitude
+        };
+
+        dbConfig.addEvent(event, (err, newEvent) => {
+          let newEventSchedule = {
+            id_schedule: userSchedule.id,
+            id_event: newEvent.id,
+            date_time: schedule[day]['date']
+          };
+
+          dbConfig.addEventSchedule(
+            newEventSchedule,
+            (err, newEventSchedule) => {
+              // console.log('newEvent', newEventSchedule);
+              if (err) {
+                console.error(err);
+              } else {
+                // res.status(201).send(newSchedule);
+              }
+            }
+          );
         });
       }
+    });
+  });
+}
+
+app.post('/user/event_schedule', (req, res) => {
+  let uid = req.body.userId;
+  // let startDate = req.body.startDate;
+  // let endDate = req.body.endDate;
+  let location = req.body.location;
+
+  const startDate = new Date('February 10, 2018 00:00:00');
+  const endDate = new Date('February 13, 2018 00:00:00');
+
+  let schedule = { name: 'New Schedule', userId: uid };
+
+  dbConfig.createSchedule(schedule, (err, userSchedule) => {
+    dbConfig.getUserLikes(uid, (err, likes) => {
+      getSchedule(startDate, endDate, location, likes, schedule => {
+        generateEventsForSchedule(userSchedule, schedule);
+        console.log('USER SCHEDULE', userSchedule);
+      });
     });
   });
 });
@@ -250,21 +319,6 @@ app.delete('event_schedule', (req, res) => {
     }
   });
 });
-// app.delete('/trigger', util.deleteTrigger);
-// deleteTrigger: function (req, res) {
-//   if (req.session.user && req.cookies.user_sid) {
-//     const trigger = req.body;
-//     db.deleteTrigger(trigger, (err) => {
-//       if (err) {
-//         res.send(err);
-//       } else {
-//         res.send('deleted trigger');
-//       }
-//     });
-//   } else {
-//     res.send(401, 'unauthorized request');
-//   }
-// }
 
 app.get('/photos', (req, res) => {
   dbConfig.getPhotos((err, photos) => {
