@@ -19,7 +19,8 @@ const {
   Schedule,
   Photo,
   Hometown,
-  UserHometown
+  UserHometown,
+  UserSchedule
 } = require('./models/exports');
 
 module.exports = {
@@ -185,7 +186,9 @@ module.exports = {
   },
 
   addEvent: (event, callback) => {
-    Event.create(event, { fields: ['id_type', 'location', 'name', 'googleId'] })
+    Event.create(event, {
+      fields: ['id_type', 'latitude', 'longitude', 'name']
+    })
       .then(event => {
         callback(null, event);
       })
@@ -258,20 +261,10 @@ module.exports = {
       });
   },
 
-  addEventSchedule: (event, callback) => {
-    EventSchedule.create(event, { fields: ['name', 'id_event', 'id_schedule'] })
-      .then(schedule => {
-        callback(null, schedule);
-      })
-      .catch(err => {
-        callback(err);
-      });
-  },
-
-  getEventSchedule: (eventSchedule, callback) => {
-    EventSchedule.findById(eventSchedule.id)
-      .then(eventSchedule => {
-        return eventSchedule.getEventSchedule();
+  getEventSchedule: (event, callback) => {
+    Event.findById(event.id)
+      .then(event => {
+        return event.getEventSchedule();
       })
       .then(schedule => {
         Schedule.findById(schedule.id);
@@ -325,8 +318,8 @@ module.exports = {
       });
   },
 
-  // createSchedule: (schedule, callback) => {
-  //   Schedule.create(schedule, { fields: ['name'] })
+  // createUserSchedule: (userSchedule, callback) => {
+  //   UserSchedule.create(userSchedule, { fields: ['id_user', 'id_schedule'] })
   //     .then(schedule => {
   //       callback(null, schedule);
   //     })
@@ -335,28 +328,27 @@ module.exports = {
   //     });
   // },
 
-  // addEventSchedule: (event, callback) => {
-  //   EventSchedule.create(event, { fields: ['name', 'id_event', 'id_schedule'] })
-  //     .then(schedule => {
-  //       callback(null, schedule);
-  //     })
-  //     .catch(err => {
-  //       callback(err);
-  //     });
-  // },
-
-  createSchedule: (schedule, addEventSchedule, callback) => {
-    Schedule.create(schedule, { fields: ['name', 'id_user'] })
+  addEventSchedule: (event, callback) => {
+    EventSchedule.create(event, {
+      fields: ['date_time', 'id_event', 'id_schedule']
+    })
       .then(schedule => {
-        addEventSchedule(null, schedule);
+        callback(null, schedule);
       })
       .catch(err => {
         callback(err);
       });
   },
 
-  // updateSchedule
-  // deleteSchedule
+  createSchedule: (schedule, callback) => {
+    Schedule.create(schedule, { fields: ['name', 'id_user'] })
+      .then(schedule => {
+        callback(null, schedule);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
 
   getEventsForSchedule: (sid, callback) => {
     EventSchedule.findAll({ where: { id_schedule: sid } })
