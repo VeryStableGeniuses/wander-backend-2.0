@@ -208,9 +208,9 @@ app.get('/schedule/:sid/events', (req, res) => {
   });
 });
 
-app.get('/user/:uid/schedule', (req, res) => {
-  let uid = req.params.uid;
-  dbConfig.getSchedulesForUser(uid, (err, schedule) => {
+app.get('/user/:sid/schedule', (req, res) => {
+  let sid = req.params.sid;
+  dbConfig.getSchedulesForUser(sid, (err, schedule) => {
     if (err) {
       res.send(err);
     } else {
@@ -271,16 +271,14 @@ function generateEventsForSchedule(userSchedule, schedule) {
             date_time: schedule[day]['date']
           };
 
-          dbConfig.addEventSchedule(
-            newEventSchedule,
-            (err, newEventSchedule) => {
-              // console.log('newEvent', newEventSchedule);
-              if (err) {
-                console.error(err);
-              } else {
-                // res.status(201).send(newSchedule);
-              }
+          dbConfig.addEventSchedule(newEventSchedule,(err, req, res, newEventSchedule) => {
+            // console.log('newEvent', newEventSchedule);
+            if (err) {
+              res.send(err);
+            } else {
+              res.status(201).send(newEventSchedule);
             }
+          }
           );
         });
       }

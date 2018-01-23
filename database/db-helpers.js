@@ -307,26 +307,26 @@ module.exports = {
       });
   },
 
-  // app.get('/schedules')
-  getSchedulesForUser: (uid, callback) => {
-    Schedule.findAll({ where: { id_user: uid } })
-      .then(schedules => {
-        callback(null, schedules);
+  // app.get('/user_schedules')
+  getSchedulesForUser: (sid, callback) => {
+    UserSchedule.findAll({ where: { id_schedule: sid } })
+      .then(userSchedules => {
+        callback(null, userSchedules);
       })
       .catch(err => {
         callback(err);
       });
   },
 
-  // createUserSchedule: (userSchedule, callback) => {
-  //   UserSchedule.create(userSchedule, { fields: ['id_user', 'id_schedule'] })
-  //     .then(schedule => {
-  //       callback(null, schedule);
-  //     })
-  //     .catch(err => {
-  //       callback(err);
-  //     });
-  // },
+  createUserSchedule: (userSchedule, callback) => {
+    UserSchedule.create(userSchedule, { fields: ['id_user', 'id_schedule'] })
+      .then(schedule => {
+        callback(null, schedule);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
 
   addEventSchedule: (event, callback) => {
     EventSchedule.create(event, {
@@ -341,7 +341,7 @@ module.exports = {
   },
 
   createSchedule: (schedule, callback) => {
-    Schedule.create(schedule, { fields: ['name', 'id_user'] })
+    Schedule.create(schedule, { fields: ['name'] })
       .then(schedule => {
         callback(null, schedule);
       })
