@@ -208,6 +208,17 @@ app.get('/schedule/:sid/events', (req, res) => {
   });
 });
 
+app.post('/user_schedule', (req, res) => {
+  let userSchedule = req.body;
+  dbConfig.createUserSchedule(userSchedule, (err, newUserSchedule) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.status(201).send(newUserSchedule);
+    }
+  });
+});
+
 app.get('/user/:sid/schedule', (req, res) => {
   let sid = req.params.sid;
   dbConfig.getSchedulesForUser(sid, (err, schedule) => {
@@ -218,36 +229,6 @@ app.get('/user/:sid/schedule', (req, res) => {
     }
   });
 });
-
-// app.post('/user/:uid/event_schedule', (req, res) => {
-//   let uid = req.body.userId;
-//   dbConfig.getUserLikes(uid, (err, likes) => {
-//     let startDate = req.body.startDate;
-//     let endDate = req.body.endDate;
-//     let location = req.body.location;
-//     getSchedule(startDate, endDate, location, likes, schedule => {
-//       // Object.keys(schedule)
-//       // map over keys array -->
-//       // Promise.all([array of async functions])
-//       // .then(results of async functions)
-//       // const events = Object.keys(schedule);
-//       // events.map(event => {
-//       //   return Promise.all([dbConfig.createSchedule(event, (err, newSchedule) => {
-
-//       //   })])
-//       // })
-//       for (let event in schedule) {
-//         dbConfig.createSchedule(event, (err, newSchedule) => {
-//           if (err) {
-//             res.send(err);
-//           } else {
-//             res.status(201).send(newSchedule);
-//           }
-//         });
-//       }
-//     });
-//   });
-// });
 
 function generateEventsForSchedule(userSchedule, schedule) {
   // console.log(schedule);
@@ -295,7 +276,7 @@ app.post('/user/event_schedule', (req, res) => {
   const startDate = new Date('February 10, 2018 00:00:00');
   const endDate = new Date('February 13, 2018 00:00:00');
 
-  let schedule = { name: 'New Schedule', userId: uid };
+  let schedule = { name: 'New Schedule' };
 
   dbConfig.createSchedule(schedule, (err, userSchedule) => {
     dbConfig.getUserLikes(uid, (err, likes) => {
@@ -306,6 +287,8 @@ app.post('/user/event_schedule', (req, res) => {
     });
   });
 });
+
+
 
 app.delete('event_schedule', (req, res) => {
   const eventSchedule = req.body;
