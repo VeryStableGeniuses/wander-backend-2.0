@@ -25,6 +25,7 @@ app.get('/', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
+  console.log('login hit');
   const email = req.body.email;
   const password = req.body.password;
   dbConfig.getuserByEmail(email, (err, user) => {
@@ -45,7 +46,11 @@ app.post('/login', (req, res) => {
         }
         if (isMatch) {
           const token = jwt.sign(user.dataValues, process.env.LOCALSECRET);
+<<<<<<< HEAD
+          res.json(`token: ${token}`, user.dataValues.id);
+=======
           res.json(`{token: ${token}, id: ${user.id}}`);
+>>>>>>> 3e03a3ce730d69b583995529854848f15113277e
         } else {
           res.json('Password is incorrect');
         }
@@ -64,7 +69,8 @@ app.post('/signup', (req, res) => {
     if (err) {
       res.json('User was not created ', err);
     } else {
-      return res.json('User created');
+      console.log(user);
+      return res.json('User created', user.dataValues);
     }
   });
 });
@@ -210,23 +216,23 @@ app.get('/photos', (req, res) => {
 });
 
 app.post('/user/:uid/event_schedule', (req, res) => {
-  let uid = req.body.userId;
-  dbConfig.getUserLikes(uid, (err, likes) => {
-    let startDate = req.body.startDate;
-    let endDate = req.body.endDate;
-    let location = req.body.location;
-    getSchedule(startDate, endDate, location, likes, schedule => {
-      for (let event in schedule) {
-        dbConfig.createSchedule(event, (err, newSchedule) => {
-          if (err) {
-            console.error(err);
-          } else {
-            res.send(newSchedule.dataValues);
-          }
-        });
-      }
-    });
+  const uid = req.body.userId;
+  // dbConfig.getUserLikes(uid, (err, likes) => {
+  const startDate = req.body.startDate;
+  const endDate = req.body.endDate;
+  const location = req.body.location;
+  getSchedule(startDate, endDate, location, interests, (schedule) => {
+    for (let event in schedule) {
+      dbConfig.createSchedule(event, (err, newSchedule) => {
+        if (err) {
+          console.error(err);
+        } else {
+          res.send(newSchedule.dataValues);
+        }
+      });
+    }
   });
+  // });
 });
 
 // app.get('/photo', (req, res) => {
