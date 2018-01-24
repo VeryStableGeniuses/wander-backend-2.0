@@ -331,8 +331,8 @@ module.exports = {
   },
   
   // app.get('/user_schedules')
-  getSchedulesForUser: (sid, callback) => {
-    UserSchedule.findAll({ where: { id_schedule: sid } })
+  getSchedulesForUser: (uid, callback) => {
+    UserSchedule.findAll({ where: { id_user: uid } })
       .then(userSchedules => {
         callback(null, userSchedules);
       })
