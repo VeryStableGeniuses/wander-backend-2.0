@@ -14,7 +14,6 @@ require('../auth/local-auth')(passport);
 const { getSchedule } = require('../scheduleBuilder');
 
 // app.use(express.static(`${__dirname}/dist`));
-// set morgan to log info about our requests for development
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(passport.initialize());
@@ -28,8 +27,13 @@ app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   dbConfig.getuserByEmail(email, (err, user) => {
-    //console.log(user);
-    //console.log(user.dataValues); // The dataValues object contains the fields from the database. This is what we need
+    const tokenData = {
+      id: user.dataValues.id,
+      name: user.dataValues.name,
+      email_address: user.dataValues.email_address,
+    };
+    // console.log(tokenData);
+    // console.log(user.dataValues); The dataValues object contains the fields from the database. This is what we need
     if (err) {
       throw err;
     }
@@ -44,8 +48,8 @@ app.post('/login', (req, res) => {
           throw err;
         }
         if (isMatch) {
-          const token = jwt.sign(user.dataValues, process.env.LOCALSECRET);
-          res.json(`{token: ${token}, id: ${user.id}}`);
+          const token = jwt.sign(tokenData, process.env.LOCALSECRET);
+          res.json(`JWT ${token}`);
         } else {
           res.json('Password is incorrect');
         }
@@ -64,17 +68,26 @@ app.post('/signup', (req, res) => {
     if (err) {
       res.json('User was not created');
     } else {
-      return res.json('User created');
+      // console.log('user object ', user);
+      const tokenData = {
+        id: user.dataValues.id,
+        name: user.dataValues.name,
+        email_address: user.dataValues.email_address,
+      };
+      // console.log('tokenData ', tokenData);
+      const token = jwt.sign(tokenData, process.env.LOCALSECRET);
+      return res.json(`JWT ${token}`);
     }
   });
 });
 
-app.get('/dashboard/:uid', (req, res) => {
+app.get('/dashboard', passport.authenticate('jwt', {session: false}), (req, res) => {
   // route on dashboard that'll get all schedules tied to a user
-  let uid = req.params.uid;
-  dbConfig.getSchedulesForUser(uid, (err, schedules) => {
+  console.log(`this is response body ${res.body}`);
+  dbConfig.getSchedulesForUser(2, (err, schedules) => {
     if (err) {
-      res.json('Error getting schedules ', err);
+      console.log('db get schedules error ', err);
+      res.status(401).json(err);
     } else {
       res.status(200).send(schedules);
     }

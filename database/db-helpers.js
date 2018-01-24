@@ -286,7 +286,6 @@ module.exports = {
       });
   },
 
-  // app.get('/schedules')
   getSchedulesForUser: (uid, callback) => {
     Schedule.findAll({ where: { id_user: uid } })
       .then(schedules => {
@@ -296,45 +295,6 @@ module.exports = {
         callback(err);
       });
   },
-
-  // createScheduleForUser: (userSchedule, callback) => {
-  //   scheduleBuilder
-  //     .getSchedule(
-  //       new Date('February 10, 2018 00:00:00'),
-  //       new Date('Febrauary 13, 2018 00:00:00'),
-  //       'New Orleans',
-  //       ['museum', 'park', 'point_of_interest', 'music'],
-  //       callback
-  //     )
-  //     .then(userSchedule => {
-  //       callback(null, userSchedule);
-  //     })
-  //     .then(EventSchedule => {
-  //       callback(null, EventSchedule);
-  //     })
-  //     .catch(err => {
-  //       callback(err);
-  //     });
-  // },
-  // createSchedule: (schedule, callback) => {
-  //   Schedule.create(schedule, { fields: ['name'] })
-  //     .then(schedule => {
-  //       callback(null, schedule);
-  //     })
-  //     .catch(err => {
-  //       callback(err);
-  //     });
-  // },
-
-  // createSchedule: (schedule, callback) => {
-  //   Schedule.create(schedule, { fields: ['name'] })
-  //     .then(schedule => {
-  //       callback(null, schedule);
-  //     })
-  //     .catch(err => {
-  //       callback(err);
-  //     });
-  // },
 
   addEventSchedule: (event, callback) => {
     EventSchedule.create(event, { fields: ['name', 'id_event', 'id_schedule' ] })
