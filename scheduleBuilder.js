@@ -1,25 +1,5 @@
 const axios = require('axios');
 const { keys } = require('./config');
-const { breakfast, other } = require('./restaurantTypes');
-
-const attractionTimes = {
-  amusement_park: 12,
-  aquarium: 3,
-  art_gallery: 3,
-  book_store: 1,
-  bowling_alley: 2,
-  casino: 3,
-  clothing_store: 1,
-  point_of_interest: 3,
-  shopping_mall: 3,
-  library: 2,
-  movie_theater: 3,
-  museum: 5,
-  night_club: 3,
-  park: 1,
-  stadium: 5,
-  zoo: 5,
-};
 
 // Helper function to get the distance between two locations with lat/lng
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -39,7 +19,7 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 // Helper function to rank the likelihood that a user is interested in an event balanced with
 // how close that event is to the most recent event
 const makeRankings = (googleData, predictHQ, interests, dislikes) => {
-  const possibilities = googleData.results
+  const possibilities = googleData
     .filter((event) => {
       for (let i = 0; i < event.types.length; i++) {
         if (interests.includes(event.types[i]) && event.name !== 'Walking Tours' && !dislikes.includes(event.types[i])) {
@@ -70,11 +50,28 @@ const makeRankings = (googleData, predictHQ, interests, dislikes) => {
   return sortedByDistance;
 };
 
+const sortByDistance = (googleData) => {
+  let sortedByDistance = googleData.slice(1);
+  sortedByDistance.forEach((event) => {
+    event.distanceFromTopRated = calculateDistance(
+      googleData[0].latlng.lat,
+      googleData[0].latlng.lng,
+      event.latlng.lat,
+      event.latlng.lng
+    );
+  });
+  sortedByDistance = sortedByDistance.sort((a, b) =>
+    a.distanceFromTopRated - b.distanceFromTopRated);
+
+  sortedByDistance.unshift(googleData[0]);
+  return sortedByDistance;
+};
+
 const findRestaurant = (location, placed, restaurants) => {
   restaurants.forEach(restaurant =>
     calculateDistance(
-      location.geometry.location.lat,
-      location.geometry.location.lng,
+      location.latlng.lat,
+      location.latlng.lng,
       Number(restaurant.restaurant.location.latitude),
       Number(restaurant.restaurant.location.longitude)
     ));
@@ -91,7 +88,7 @@ const findRestaurant = (location, placed, restaurants) => {
 };
 
 // Helper function to fill out the day
-const fillDay = (day, rankedList, interests, currentDay, restaurants) => {
+const fillDay = (day, rankedList, interests, restaurants) => {
   let timeSpent = 0;
   let currentEvent = 0;
   let eventsPlaced = 0;
@@ -100,6 +97,7 @@ const fillDay = (day, rankedList, interests, currentDay, restaurants) => {
     day[`event${++eventsPlaced}`] = {
       name: rankedList[currentEvent].name,
       location: { latitude: rankedList[currentEvent].geometry.location.lat, longitude: rankedList[currentEvent].geometry.location.lng},
+      googleId: rankedList[currentEvent].place_id,
     };
     if (attractionTimes[rankedList[currentEvent].types[0]]) {
       timeSpent += attractionTimes[rankedList[currentEvent].types[0]];
@@ -115,82 +113,99 @@ const fillDay = (day, rankedList, interests, currentDay, restaurants) => {
 };
 
 // Here's where the magic happens
-const scheduleBuilder = (startDate, endDate, google, restaurantData, interests) => {
-  // Get the user's interests and dislikes, store them in arrays
-  
-  const dislikes = ['aquarium', 'casino'];
+const scheduleBuilder = (startDate, endDate, google, restaurantData, predictHQ, interests) => {
+  const filteredData = google.map((location) => {
+    return { name: location.name, placeId: location.place_id, rating: location.rating, latlng: location.geometry.location };
+  });
+
+  const sorted = sortByDistance(filteredData);
+
   startDate = new Date(startDate);
   endDate = new Date(endDate);
-  // Figure out what the current day of the week is to check if it's open then
-  let currentDay = startDate.getDay();
-
+  
+  // Get the start day out
   let currentDate = startDate;
-  // startDate = 0;
-
+  
   // Initialize the empty schedule object
   const schedule = {};
-
+  
   // Get the total number of days that the user will be in the destination
   const numberOfDays =
     Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-
+  
   // Fill the schedule with "day" objects
   for (let i = 1; i < numberOfDays + 2; i += 1) {
     schedule[`day_${i}`] = {};
   }
 
-  // This is just here so that the function can actually run
-  const predictHQPlaceHolder = true;
-
-  // Make the ranked list
-  const sortedAndRated = makeRankings(google, predictHQPlaceHolder, interests, dislikes);
-
+  const googleLength = google.length;
+  
   // Go through each day, fill it out with events
   const days = Object.keys(schedule);
   days.forEach((day) => {
-    fillDay(schedule[day], sortedAndRated, interests, currentDay, restaurantData.restaurants);
+    schedule[day].events = sorted.splice(0, Math.floor(googleLength / (numberOfDays + 1)));
+    schedule[day].liveEvents = [];
+    schedule[day].restaurants = [];
+    predictHQ.forEach((event, i) => {
+      if (new Date(event.start).getDate() === currentDate.getDate()) {
+        schedule[day].liveEvents.push(event);
+        predictHQ.splice(i, 1);
+      }
+    });
+    for (let i = 0; i < 4; i++) {
+      schedule[day].restaurants.push(findRestaurant(schedule[day].events[0], 0, restaurantData));
+    }
     schedule[day].date = new Date(currentDate);
     currentDate.setDate(currentDate.getDate() + 1);
-    currentDay = currentDay < 7 ? currentDay + 1 : 0;
+
   });
   return schedule;
 };
 
 const getSchedule = (startDate, endDate, location, interests, cb) => {
   const query = location.split(' ').join('+');
-  const config = {
+  const zomatoConfig = {
     headers: {
       'user-key': keys.zomato,
     },
   };
-  let googleData;
-  let restaurantData;
+  const predictHQconfig = {
+    headers: {
+      Authorization: `Bearer ${keys.predictHQToken}`,
+    },
+  };
+  let googleData = [];
   axios.get(`https://maps.googleapis.com/maps/api/place/textsearch/json?query=${query}+point+of+interest&language=en&key=${keys.googlePlacesAPI}`)
-    .then(googleResponse => {
-      googleData = googleResponse;
-      axios.get(`https://developers.zomato.com/api/v2.1/search?lat=${googleResponse.data.results[0].geometry.location.lat}&lon=${googleResponse.data.results[0].geometry.location.lng}&sort=rating`, config)
-        .then(restaurantResponse => {
-          restaurantData = restaurantResponse;
-          cb(scheduleBuilder(startDate, endDate, googleData.data, restaurantData.data, interests = ['museum', 'park', 'point_of_interest', 'music']));
-        })
-        .catch(error => console.error(error));
+    .then((response1) => {
+      googleData = googleData.concat(response1.data.results);
+      return axios.get(`https://maps.googleapis.com/maps/api/place/textsearch/json?pagetoken=${response1.data.next_page_token}&key=${keys.googlePlacesAPI}`)
+    })
+    .then((response2) => {
+      if (response2.data.results.length) {
+        googleData = googleData.concat(response2.data.results);
+      }
+      return axios.get(`https://maps.googleapis.com/maps/api/place/textsearch/json?pagetoken=${response2.data.next_page_token}&key=${keys.googlePlacesAPI}`)
+    })
+    .then((response3) => {
+      if (response3.data.results.length) {
+        googleData = googleData.concat(response3.data.results);
+      }
+      return Promise.all([
+        axios.get(`https://api.predicthq.com/v1/events/?category=concerts,festivals,performing-arts,sports&within=10mi@${googleData[0].geometry.location.lat},${googleData[0].geometry.location.lng}.0060&start.gte=2018-02-11&start.lte=2018-02-17&rank_level=4,5`, predictHQconfig),
+        axios.get(`https://developers.zomato.com/api/v2.1/search?lat=${googleData[0].geometry.location.lat}&lon=${googleData[0].geometry.location.lng}&sort=rating`, zomatoConfig),
+      ]);
+    })
+    .then(([predictHQ, zomato]) => {
+      cb(scheduleBuilder(startDate, endDate, googleData, zomato.data.restaurants, predictHQ.data.results, interests));
     })
     .catch(err => console.error(err));
-  // return Promise.all([
-  //   axios.get(`https://maps.googleapis.com/maps/api/place/textsearch/json?query=${query}+point+of+interest&language=en&key=${keys.googlePlacesAPI}`),
-  //   axios.get(`https://developers.zomato.com/api/v2.1/search?q=${query}&sort=rating`, config),
-  // ])
-  //   .then(([restaurants, googlePlaces]) => cb(scheduleBuilder(startDate, endDate, restaurants.data, googlePlaces.data, interests)))
-  //   .catch(err => console.error(err));
 };
 
+// const start = new Date('February 10, 2018 00:00:00');
+// const end = new Date('Febrauary 13, 2018 00:00:00');
+// const query = 'New York City';
+// const interests = ['museum', 'park', 'point_of_interest', 'music'];
 
-
-const start = new Date('February 10, 2018 00:00:00');
-const end = new Date('Febrauary 13, 2018 00:00:00');
-const query = 'New Orleans';
-const interests = ['museum', 'park', 'point_of_interest', 'music'];
-
-// getSchedule(start, end, query, interests, (schedule) => console.log(schedule));
+// getSchedule(start, end, query, interests, response => console.log(response));
 
 module.exports.getSchedule = getSchedule;
