@@ -272,17 +272,17 @@ app.get('/user/:sid/schedule', (req, res) => {
 // }
 
 app.post('/user/event_schedule', (req, res) => {
-  let uid = req.body.userId;
-  // let startDate = new Date(parseInt(req.body.startDate));
-  // let endDate = new Date(parseInt(req.body.endDate));
-  let location = req.body.location;
+  const uid = req.body.userId;
+  // const startDate = new Date(req.body.startDate);
+  // const endDate = new Date(req.body.endDate);
+  const location = req.body.location;
 
 
   const startDate = new Date('February 10, 2018 00:00:00');
   const endDate = new Date('February 13, 2018 00:00:00');
   // const likes = ['museum', 'park', 'point_of_interest', 'music'];
 
-  let schedule = { name: 'New Schedule' };
+  const schedule = { name: 'New Schedule' };
 
   // getSchedule(startDate, endDate, location, likes, eventSchedule => {
   //   res.json(eventSchedule);
@@ -292,7 +292,7 @@ app.post('/user/event_schedule', (req, res) => {
     if (err) {
       res.send(err);
     }
-    let userSchedule = { id_user: uid, id_schedule: newSchedule.id };
+    const userSchedule = { id_user: uid, id_schedule: newSchedule.id };
     dbConfig.createUserSchedule(userSchedule, (err, newUserSchedule) => {
       if (err) {
         res.send(err);
