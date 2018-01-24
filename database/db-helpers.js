@@ -268,6 +268,35 @@ module.exports = {
       });
   },
 
+  updateSchedule: (schedule, callback) => {
+    Schedule.findById(schedule.id).then(found => {
+      return found
+        .update(schedule, {
+          fields: ['name']
+        })
+        .save();
+    })
+      .then(updatedSchedule => {
+        callback(null, updatedSchedule);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  deleteSchedule: (schedule, callback) => {
+    Schedule.findById(schedule.id)
+      .then(found => {
+        return found.destroy().save();
+      })
+      .then(() => {
+        callback(null);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+  
   addEventSchedule: (event, callback) => {
     EventSchedule.create(event, {
       fields: ['date_time', 'id_event', 'id_schedule']
