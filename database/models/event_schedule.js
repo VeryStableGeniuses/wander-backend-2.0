@@ -6,5 +6,5 @@ const EventSchedule = sequelize.define('event_schedule', {
   dateTime: Sequelize.DATE
 });
 
-
 module.exports = EventSchedule;
+

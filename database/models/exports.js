@@ -8,4 +8,5 @@ module.exports = {
   Photo: require('./Photo'),
   Hometown: require('./Hometown'),
   UserHometown: require('./user_hometown'),
+  UserSchedule: require('./user_schedule'),
 };

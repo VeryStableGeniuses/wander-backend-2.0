@@ -9,7 +9,8 @@ const {
   Schedule,
   Photo,
   Hometown,
-  UserHometown
+  UserHometown,
+  UserSchedule,
 } = require('./models/exports');
 
 UserLike.belongsTo(Type, { foreignKey: 'id_type' });
@@ -24,11 +25,17 @@ Type.hasMany(Event, { foreignKey: 'id_type' });
 EventSchedule.belongsTo(Event, { foreignKey: 'id_event' });
 Event.hasMany(EventSchedule, { foreignKey: 'id_event' });
 
-EventSchedule.belongsTo(Schedule, { foreignKey: 'id_schedule'});
-Schedule.hasMany(EventSchedule, { foreignKey: 'id_schedule'});
+EventSchedule.belongsTo(Schedule, { foreignKey: 'id_schedule' });
+Schedule.hasMany(EventSchedule, { foreignKey: 'id_schedule' });
 
-Schedule.belongsTo(User, { foreignKey: 'id_user' });
-User.hasMany(Schedule, { foreignKey: 'id_user' });
+// Schedule.belongsTo(User, { foreignKey: 'id_user' });
+// User.hasMany(Schedule, { foreignKey: 'id_user' });
+
+UserSchedule.belongsTo(User, { foreignKey: 'id_user' });
+User.hasMany(UserSchedule, { foreignKey: 'id_user' });
+
+UserSchedule.belongsTo(Schedule, { foreignKey: 'id_schedule' });
+Schedule.hasMany(UserSchedule, { foreignKey: 'id_schedule' });
 
 Photo.belongsTo(User, { foreignKey: 'id_user' });
 User.hasMany(Photo, { foreignKey: 'id_user' });
