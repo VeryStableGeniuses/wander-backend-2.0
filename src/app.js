@@ -46,11 +46,7 @@ app.post('/login', (req, res) => {
         }
         if (isMatch) {
           const token = jwt.sign(user.dataValues, process.env.LOCALSECRET);
-<<<<<<< HEAD
-          res.json(`token: ${token}`, user.dataValues.id);
-=======
           res.json(`{token: ${token}, id: ${user.id}}`);
->>>>>>> 3e03a3ce730d69b583995529854848f15113277e
         } else {
           res.json('Password is incorrect');
         }
@@ -136,7 +132,7 @@ app.get('/user/:uid/likes', (req, res) => {
 });
 
 app.post('/user_like', (req, res) => {
-  let userLike = req.body;
+  let { userLike } = req.body;
   dbConfig.addUserLike(userLike, (err, userLike) => {
     if (err) {
       console.error(err);
@@ -217,22 +213,22 @@ app.get('/photos', (req, res) => {
 
 app.post('/user/:uid/event_schedule', (req, res) => {
   const uid = req.body.userId;
-  // dbConfig.getUserLikes(uid, (err, likes) => {
-  const startDate = req.body.startDate;
-  const endDate = req.body.endDate;
-  const location = req.body.location;
-  getSchedule(startDate, endDate, location, interests, (schedule) => {
-    for (let event in schedule) {
-      dbConfig.createSchedule(event, (err, newSchedule) => {
-        if (err) {
-          console.error(err);
-        } else {
-          res.send(newSchedule.dataValues);
-        }
-      });
-    }
+  dbConfig.getUserLikes(uid, (err, likes) => {
+    const startDate = req.body.startDate;
+    const endDate = req.body.endDate;
+    const location = req.body.location;
+    getSchedule(startDate, endDate, location, likes, (schedule) => {
+      for (let event in schedule) {
+        dbConfig.createSchedule(event, (err, newSchedule) => {
+          if (err) {
+            console.error(err);
+          } else {
+            res.send(newSchedule.dataValues);
+          }
+        });
+      }
+    });
   });
-  // });
 });
 
 // app.get('/photo', (req, res) => {
