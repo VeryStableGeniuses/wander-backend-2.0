@@ -232,65 +232,86 @@ app.get('/user/:sid/schedule', (req, res) => {
   });
 });
 
-function generateEventsForSchedule(userSchedule, schedule) {
-  // console.log(schedule);
-  let days = Object.keys(schedule);
-  days.forEach(day => {
-    let events = Object.keys(schedule[day]);
-    events.forEach(eventKey => {
-      if (eventKey !== 'date') {
-        let eventName = schedule[day][eventKey].name;
-        let eventLocation = schedule[day][eventKey].location;
-        let event = {
-          name: eventName,
-          latitude: eventLocation.latitude,
-          longitude: eventLocation.longitude
-        };
+// function generateEventsForSchedule(userSchedule, schedule) {
+//   // console.log(schedule);
+//   let days = Object.keys(schedule);
+//   days.forEach(day => {
+//     let events = Object.keys(schedule[day]);
+//     events.forEach(eventKey => {
+//       if (eventKey !== 'date') {
+//         let eventName = schedule[day][eventKey].name;
+//         let eventLocation = schedule[day][eventKey].location;
+//         let event = {
+//           name: eventName,
+//           latitude: eventLocation.latitude,
+//           longitude: eventLocation.longitude
+//         };
 
-        dbConfig.addEvent(event, (err, newEvent) => {
-          let newEventSchedule = {
-            id_schedule: userSchedule.id,
-            id_event: newEvent.id,
-            date_time: schedule[day]['date']
-          };
+//         dbConfig.addEvent(event, (err, newEvent) => {
+//           let newEventSchedule = {
+//             id_schedule: userSchedule.id,
+//             id_event: newEvent.id,
+//             date_time: schedule[day]['date']
+//           };
 
-          dbConfig.addEventSchedule(newEventSchedule,(err, req, res, newEventSchedule) => {
-            // console.log('newEvent', newEventSchedule);
-            if (err) {
-              res.send(err);
-            } else {
-              res.status(201).send(newEventSchedule);
-            }
-          }
-          );
-        });
-      }
-    });
-  });
-}
+//           dbConfig.addEventSchedule(
+//             newEventSchedule,
+//             (err, req, res, newEventSchedule) => {
+//               // console.log('newEvent', newEventSchedule);
+//               if (err) {
+//                 res.send(err);
+//               } else {
+//                 res.status(201).send(newEventSchedule);
+//               }
+//             }
+//           );
+//         });
+//       }
+//     });
+//   });
+// }
 
 app.post('/user/event_schedule', (req, res) => {
   let uid = req.body.userId;
-  // let startDate = req.body.startDate;
-  // let endDate = req.body.endDate;
+  // let startDate = new Date(parseInt(req.body.startDate));
+  // let endDate = new Date(parseInt(req.body.endDate));
   let location = req.body.location;
+
 
   const startDate = new Date('February 10, 2018 00:00:00');
   const endDate = new Date('February 13, 2018 00:00:00');
+  // const likes = ['museum', 'park', 'point_of_interest', 'music'];
 
   let schedule = { name: 'New Schedule' };
 
-  dbConfig.createSchedule(schedule, (err, userSchedule) => {
-    dbConfig.getUserLikes(uid, (err, likes) => {
-      getSchedule(startDate, endDate, location, likes, schedule => {
-        generateEventsForSchedule(userSchedule, schedule);
-        console.log('USER SCHEDULE', userSchedule);
+  // getSchedule(startDate, endDate, location, likes, eventSchedule => {
+  //   res.json(eventSchedule);
+  // });
+
+  dbConfig.createSchedule(schedule, (err, newSchedule) => {
+    if (err) {
+      res.send(err);
+    }
+    let userSchedule = { id_user: uid, id_schedule: newSchedule.id };
+    dbConfig.createUserSchedule(userSchedule, (err, newUserSchedule) => {
+      if (err) {
+        res.send(err);
+      }
+      dbConfig.getUserLikes(uid, (err, likes) => {
+        if (err) {
+          res.send(err);
+        }
+        getSchedule(startDate, endDate, location, likes, eventSchedule => {
+          res.status(201).json({
+            schedule: newSchedule,
+            userSchedule: newUserSchedule,
+            eventSchedule: eventSchedule
+          });
+        });
       });
     });
   });
 });
-
-
 
 app.delete('event_schedule', (req, res) => {
   const eventSchedule = req.body;
