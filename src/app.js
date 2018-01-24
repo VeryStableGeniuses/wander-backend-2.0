@@ -25,6 +25,7 @@ app.get('/', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
+  console.log('login hit');
   const email = req.body.email;
   const password = req.body.password;
   dbConfig.getuserByEmail(email, (err, user) => {
@@ -64,7 +65,8 @@ app.post('/signup', (req, res) => {
     if (err) {
       res.json('User was not created ', err);
     } else {
-      return res.json('User created');
+      console.log(user);
+      return res.json('User created', user.dataValues);
     }
   });
 });
