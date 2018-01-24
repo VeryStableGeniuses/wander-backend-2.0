@@ -90,7 +90,7 @@ app.get('/logout', (req, res) => {
 // app.post('/logout', (req, res) => {});
 
 app.post('/type', (req, res) => {
-  let type = req.body;
+  const type = req.body;
   dbConfig.addType(type, (err, type) => {
     if (err) {
       res.send(err);
@@ -152,7 +152,7 @@ app.get('/events', (req, res) => {
   });
 });
 
-app.get('event', (req, res) => {
+app.get('/event', (req, res) => {
   let eventId = req.params.eid;
   dbConfig.getEventById(eventId, (err, event) => {
     if (err) {
@@ -313,7 +313,28 @@ app.post('/user/event_schedule', (req, res) => {
   });
 });
 
-app.delete('event_schedule', (req, res) => {
+app.get('/event_schedules', (req, res) => {
+  dbConfig.getEventSchedule((err, eventSchedules) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.status(200).send(eventSchedules);
+    }
+  });
+});
+
+app.post('/event_schedule', (req, res) => {
+  const eventSchedule = req.body;
+  dbConfig.addEventSchedule(eventSchedule, (err, newEventSchedule) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.status(201).send(newEventSchedule);
+    }
+  });
+});
+
+app.delete('/event_schedule', (req, res) => {
   const eventSchedule = req.body;
   dbConfig.deletescheduledEvent(eventSchedule, err => {
     if (err) {
@@ -333,15 +354,6 @@ app.get('/photos', (req, res) => {
     }
   });
 });
-// app.get('/photo', (req, res) => {
-//   dbConfig.getPhotoById((err, photo) => {
-//     if (err) {
-//       console.error(err);
-//     } else {
-//       res.send(photo);
-//     }
-//   });
-// });
 
 app.post('/photo', (req, res) => {
   let photo = req.body;

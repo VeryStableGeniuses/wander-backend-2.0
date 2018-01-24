@@ -24,20 +24,20 @@ const {
 } = require('./models/exports');
 
 module.exports = {
-  getTypes: callback => {
-    Type.findAll()
-      .then(types => {
-        callback(null, types);
+  addType: (type, callback) => {
+    Type.create(type, { fields: ['name'] })
+      .then(type => {
+        callback(null, type);
       })
       .catch(err => {
         callback(err);
       });
   },
 
-  addType: (type, callback) => {
-    Type.create(type, { fields: ['name'] })
-      .then(type => {
-        callback(null, type);
+  getTypes: callback => {
+    Type.findAll()
+      .then(types => {
+        callback(null, types);
       })
       .catch(err => {
         callback(err);
@@ -187,7 +187,14 @@ module.exports = {
 
   addEvent: (event, callback) => {
     Event.create(event, {
-      fields: ['id_type', 'latitude', 'longitude', 'name']
+      fields: [
+        'id_type',
+        'latitude',
+        'longitude',
+        'startTime',
+        'googleId',
+        'name'
+      ]
     })
       .then(event => {
         callback(null, event);
@@ -261,6 +268,18 @@ module.exports = {
       });
   },
 
+  addEventSchedule: (event, callback) => {
+    EventSchedule.create(event, {
+      fields: ['date_time', 'id_event', 'id_schedule']
+    })
+      .then(schedule => {
+        callback(null, schedule);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
   getEventSchedule: (event, callback) => {
     Event.findById(event.id)
       .then(event => {
@@ -307,7 +326,6 @@ module.exports = {
       });
   },
 
-  
   createUserSchedule: (userSchedule, callback) => {
     UserSchedule.create(userSchedule, { fields: ['id_user', 'id_schedule'] })
       .then(schedule => {
@@ -317,19 +335,7 @@ module.exports = {
         callback(err);
       });
   },
-  
-  addEventSchedule: (event, callback) => {
-    EventSchedule.create(event, {
-      fields: ['date_time', 'id_event', 'id_schedule']
-    })
-      .then(schedule => {
-        callback(null, schedule);
-      })
-      .catch(err => {
-        callback(err);
-      });
-  },
-  
+
   // app.get('/user_schedules')
   getSchedulesForUser: (sid, callback) => {
     UserSchedule.findAll({ where: { id_schedule: sid } })
