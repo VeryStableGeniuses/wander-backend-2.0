@@ -201,11 +201,11 @@ const getSchedule = (startDate, endDate, location, interests, cb) => {
     .catch(err => console.error(err));
 };
 
-const start = new Date('February 10, 2018 00:00:00');
-const end = new Date('Febrauary 13, 2018 00:00:00');
-const query = 'New York City';
-const interests = ['museum', 'park', 'point_of_interest', 'music'];
+// const start = new Date('February 10, 2018 00:00:00');
+// const end = new Date('Febrauary 13, 2018 00:00:00');
+// const query = 'New York City';
+// const interests = ['museum', 'park', 'point_of_interest', 'music'];
 
-getSchedule(start, end, query, interests, response => console.log(response));
+// getSchedule(start, end, query, interests, response => console.log(response));
 
 module.exports.getSchedule = getSchedule;
