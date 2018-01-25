@@ -29,12 +29,10 @@ app.post('/login', (req, res) => {
   const password = req.body.password;
   dbConfig.getuserByEmail(email, (err, user) => {
     const tokenData = {
-      id: user.dataValues.id,
-      name: user.dataValues.name,
-      email_address: user.dataValues.email_address,
+      id: user.id,
+      name: user.name,
+      email_address: user.email_address,
     };
-    // console.log(tokenData);
-    // console.log(user.dataValues); The dataValues object contains the fields from the database. This is what we need
     if (err) {
       throw err;
     }
@@ -43,7 +41,7 @@ app.post('/login', (req, res) => {
     }
     dbConfig.comparePassword(
       password,
-      user.dataValues.password,
+      user.password,
       (err, isMatch) => {
         if (err) {
           throw err;
@@ -69,35 +67,29 @@ app.post('/signup', (req, res) => {
     if (err) {
       res.json('User was not created');
     } else {
-      // console.log('user object ', user);
       const tokenData = {
-        id: user.dataValues.id,
-        name: user.dataValues.name,
-        email_address: user.dataValues.email_address,
+        id: user.id,
+        name: user.name,
+        email_address: user.email_address,
       };
-      // console.log('tokenData ', tokenData);
       const token = jwt.sign(tokenData, process.env.LOCALSECRET);
-      return res.json(`JWT ${token}`);
+      return res.json(token);
     }
   });
 });
 
-app.get('/dashboard', passport.authenticate('jwt', {session: false}), (req, res) => {
-  // route on dashboard that'll get all schedules tied to a user
-  console.log(`this is response body ${res.body}`);
-  dbConfig.getSchedulesForUser(2, (err, schedules) => {
+app.get('/dashboard', passport.authenticate('jwt', { session: false }), (req, res) => {
+  // route on dashboard that'll get all schedules tied to a user.
+  console.log(`user ID ${req.user.id}`);
+  dbConfig.getSchedulesForUser(req.user.id, (err, schedules) => {
     if (err) {
-      console.log('db get schedules error ', err);
-      res.status(401).json(err);
+      console.log(`db get schedules error ${err}`);
     } else {
       res.status(200).send(schedules);
     }
   });
 });
 
-app.get('/logout', (req, res) => {
-  res.json('You are logged out');
-});
 
 app.get('/logout', (req, res) => {
   res.json('You are logged out');
