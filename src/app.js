@@ -14,7 +14,6 @@ require('../auth/local-auth')(passport);
 const { getSchedule } = require('../scheduleBuilder');
 
 // app.use(express.static(`${__dirname}/dist`));
-// set morgan to log info about our requests for development
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(passport.initialize());
@@ -29,8 +28,11 @@ app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   dbConfig.getuserByEmail(email, (err, user) => {
-    //console.log(user);
-    //console.log(user.dataValues); // The dataValues object contains the fields from the database. This is what we need
+    const tokenData = {
+      id: user.id,
+      name: user.name,
+      email_address: user.email_address,
+    };
     if (err) {
       throw err;
     }
@@ -39,14 +41,14 @@ app.post('/login', (req, res) => {
     }
     dbConfig.comparePassword(
       password,
-      user.dataValues.password,
+      user.password,
       (err, isMatch) => {
         if (err) {
           throw err;
         }
         if (isMatch) {
-          const token = jwt.sign(user.dataValues, process.env.LOCALSECRET);
-          res.json(`{token: ${token}, id: ${user.id}}`);
+          const token = jwt.sign(tokenData, process.env.LOCALSECRET);
+          res.json(`JWT ${token}`);
         } else {
           res.json('Password is incorrect');
         }
@@ -63,31 +65,35 @@ app.post('/signup', (req, res) => {
   });
   dbConfig.createUser(newUser, (err, user) => {
     if (err) {
-      res.json('User was not created ', err);
+      res.json('User was not created');
     } else {
-      console.log(user);
-      return res.json('User created', user.dataValues);
+      const tokenData = {
+        id: user.id,
+        name: user.name,
+        email_address: user.email_address,
+      };
+      const token = jwt.sign(tokenData, process.env.LOCALSECRET);
+      return res.json(token);
     }
   });
 });
 
-app.get('/dashboard/:uid', (req, res) => {
-  // route on dashboard that'll get all schedules tied to a user
-  let uid = req.params.uid;
-  dbConfig.getSchedulesForUser(uid, (err, schedules) => {
+app.get('/dashboard', passport.authenticate('jwt', { session: false }), (req, res) => {
+  // route on dashboard that'll get all schedules tied to a user.
+  console.log(`user ID ${req.user.id}`);
+  dbConfig.getSchedulesForUser(req.user.id, (err, schedules) => {
     if (err) {
-      res.json('Error getting schedules ', err);
+      console.log(`db get schedules error ${err}`);
     } else {
       res.status(200).send(schedules);
     }
   });
 });
 
+
 app.get('/logout', (req, res) => {
   res.json('You are logged out');
 });
-
-// app.post('/logout', (req, res) => {});
 
 app.post('/type', (req, res) => {
   let type = req.body;

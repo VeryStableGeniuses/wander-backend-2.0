@@ -61,7 +61,7 @@ module.exports = {
         newUser.password = hash;
         User.create(newUser, { fields: ['name', 'password', 'email_address'] })
           .then(user => {
-            callback(null, user);
+            callback(null, user.dataValues);
           })
           .catch(err => {
             callback(err);
@@ -92,7 +92,7 @@ module.exports = {
       where: { email_address: email }
     })
       .then(user => {
-        callback(null, user);
+        callback(null, user.dataValues);
       })
       .catch(err => {
         callback(err);
@@ -331,8 +331,8 @@ module.exports = {
   },
   
   // app.get('/user_schedules')
-  getSchedulesForUser: (sid, callback) => {
-    UserSchedule.findAll({ where: { id_schedule: sid } })
+  getSchedulesForUser: (uid, callback) => {
+    UserSchedule.findAll({ where: { id_user: uid } })
       .then(userSchedules => {
         callback(null, userSchedules);
       })
