@@ -132,7 +132,8 @@ app.get('/user/:uid/likes', (req, res) => {
 });
 
 app.post('/user_like', (req, res) => {
-  let userLike = req.body;
+  let userLike = req.body.name;
+  console.log('REQ.BODY', req.body.name);
   dbConfig.addUserLike(userLike, (err, userLike) => {
     if (err) {
       res.send(err);
@@ -232,61 +233,55 @@ app.get('/user/:sid/schedule', (req, res) => {
   });
 });
 
-// function generateEventsForSchedule(userSchedule, schedule) {
-//   // console.log(schedule);
-//   let days = Object.keys(schedule);
-//   days.forEach(day => {
-//     let events = Object.keys(schedule[day]);
-//     events.forEach(eventKey => {
-//       if (eventKey !== 'date') {
-//         let eventName = schedule[day][eventKey].name;
-//         let eventLocation = schedule[day][eventKey].location;
-//         let event = {
-//           name: eventName,
-//           latitude: eventLocation.latitude,
-//           longitude: eventLocation.longitude
-//         };
 
-//         dbConfig.addEvent(event, (err, newEvent) => {
-//           let newEventSchedule = {
-//             id_schedule: userSchedule.id,
-//             id_event: newEvent.id,
-//             date_time: schedule[day]['date']
-//           };
+function generateEventsForSchedule(dbSchedule, schedule) {
+  delete schedule.name; // remove the schedule name, we already saved it on the db schedule
 
-//           dbConfig.addEventSchedule(
-//             newEventSchedule,
-//             (err, req, res, newEventSchedule) => {
-//               // console.log('newEvent', newEventSchedule);
-//               if (err) {
-//                 res.send(err);
-//               } else {
-//                 res.status(201).send(newEventSchedule);
-//               }
-//             }
-//           );
-//         });
-//       }
-//     });
-//   });
-// }
+  let days = Object.keys(schedule);
+  // loop over all of the days (day_1, day_2, day_3, day_4)
+  days.forEach(day => {
+    // loop over all of the event categories (events, liveEvents, restaurants)
+    let categories = Object.keys(schedule[day]);
+    categories.forEach(categoryKey => {
+      if (categoryKey !== 'date' && categoryKey !== 'userLikes') {
+        // loop over all of the events in the category
+        schedule[day][categoryKey].forEach(event => {
+          let eventObj = {
+            name: event.name ? event.name : event.title,
+            latitude: event.location
+              ? event.location.latitude
+              : event.latlng.lat,
+            longitude: event.location
+              ? event.location.longitude
+              : event.latlng.lng,
+            googleId: event.placeId,
+            startTime: event.start
+          };
 
-app.post('/user/event_schedule', (req, res) => {
-  const uid = req.body.userId;
-  // const startDate = new Date(req.body.startDate);
-  // const endDate = new Date(req.body.endDate);
-  const location = req.body.location;
+          dbConfig.addEvent(eventObj, (err, newEvent) => {
+            let newEventSchedule = {
+              id_schedule: dbSchedule.id,
+              id_event: newEvent.id,
+              dateTime: schedule[day]['date']
+            };
 
+            dbConfig.addEventSchedule(
+              newEventSchedule,
+              (err, req, res, newEventSchedule) => {
+                console.log('added scheduled event:', newEventSchedule);
+              }
+            );
+          });
+        });
+      }
+    });
+  });
+}
 
-  const startDate = new Date('February 10, 2018 00:00:00');
-  const endDate = new Date('February 13, 2018 00:00:00');
-  // const likes = ['museum', 'park', 'point_of_interest', 'music'];
+app.post('/user/:uid/schedule', (req, res) => {
+  const uid = req.params.userId;
 
-  const schedule = { name: 'New Schedule' };
-
-  // getSchedule(startDate, endDate, location, likes, eventSchedule => {
-  //   res.json(eventSchedule);
-  // });
+  let schedule = { name: req.body.name };
 
   dbConfig.createSchedule(schedule, (err, newSchedule) => {
     if (err) {
@@ -297,19 +292,20 @@ app.post('/user/event_schedule', (req, res) => {
       if (err) {
         res.send(err);
       }
-      dbConfig.getUserLikes(uid, (err, likes) => {
-        if (err) {
-          res.send(err);
-        }
-        getSchedule(startDate, endDate, location, likes, eventSchedule => {
-          res.status(201).json({
-            schedule: newSchedule,
-            userSchedule: newUserSchedule,
-            eventSchedule: eventSchedule
-          });
-        });
-      });
+
+      generateEventsForSchedule(newSchedule, req.body);
     });
+  });
+});
+
+app.delete('/schedule', (req, res) => {
+  const schedule = req.body;
+  dbConfig.deleteSchedule(schedule, err => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send('deleted schedule');
+    }
   });
 });
 
