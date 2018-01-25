@@ -121,7 +121,7 @@ app.get('/users', (req, res) => {
 });
 
 app.get('/user/:uid/likes', (req, res) => {
-  let userId = req.params.uid;
+  const userId = req.params.uid;
   dbConfig.getUserLikes(userId, (err, likes) => {
     if (err) {
       res.send(err);
@@ -132,7 +132,7 @@ app.get('/user/:uid/likes', (req, res) => {
 });
 
 app.post('/user_like', (req, res) => {
-  let userLike = req.body.name;
+  const userLike = req.body;
   console.log('REQ.BODY', req.body.name);
   dbConfig.addUserLike(userLike, (err, userLike) => {
     if (err) {
@@ -154,7 +154,7 @@ app.get('/events', (req, res) => {
 });
 
 app.get('/event', (req, res) => {
-  let eventId = req.params.eid;
+  const eventId = req.params.eid;
   dbConfig.getEventById(eventId, (err, event) => {
     if (err) {
       res.send(err);
@@ -165,7 +165,7 @@ app.get('/event', (req, res) => {
 });
 
 app.post('/event', (req, res) => {
-  let event = req.body;
+  const event = req.body;
   dbConfig.addEvent(event, (err, newEvent) => {
     if (err) {
       res.send(err);
@@ -176,7 +176,7 @@ app.post('/event', (req, res) => {
 });
 
 app.get('/:sid/schedules', (req, res) => {
-  let scheduleId = req.params.sid;
+  const scheduleId = req.params.sid;
   dbConfig.getEventsForSchedule(scheduleId, (err, events) => {
     if (err) {
       res.send(err);
@@ -190,7 +190,7 @@ app.get('/:sid/schedules', (req, res) => {
 // create Schedule, scheduled events, etc. based on user_likes
 
 app.post('/schedule', (req, res) => {
-  let schedule = req.body;
+  const schedule = req.body;
   dbConfig.createSchedule(schedule, (err, newSchedule) => {
     if (err) {
       res.send(err);
@@ -201,7 +201,7 @@ app.post('/schedule', (req, res) => {
 });
 
 app.get('/schedule/:sid/events', (req, res) => {
-  let sid = req.params.sid;
+  const sid = req.params.sid;
   dbConfig.getEventsForSchedule(sid, (err, events) => {
     if (err) {
       res.send(err);
@@ -212,7 +212,7 @@ app.get('/schedule/:sid/events', (req, res) => {
 });
 
 app.post('/user_schedule', (req, res) => {
-  let userSchedule = req.body;
+  const userSchedule = req.body;
   dbConfig.createUserSchedule(userSchedule, (err, newUserSchedule) => {
     if (err) {
       res.send(err);
@@ -223,7 +223,7 @@ app.post('/user_schedule', (req, res) => {
 });
 
 app.get('/user/:sid/schedule', (req, res) => {
-  let sid = req.params.sid;
+  const sid = req.params.sid;
   dbConfig.getSchedulesForUser(sid, (err, schedule) => {
     if (err) {
       res.send(err);
@@ -237,16 +237,16 @@ app.get('/user/:sid/schedule', (req, res) => {
 function generateEventsForSchedule(dbSchedule, schedule) {
   delete schedule.name; // remove the schedule name, we already saved it on the db schedule
 
-  let days = Object.keys(schedule);
+  const days = Object.keys(schedule);
   // loop over all of the days (day_1, day_2, day_3, day_4)
   days.forEach(day => {
     // loop over all of the event categories (events, liveEvents, restaurants)
-    let categories = Object.keys(schedule[day]);
+    const categories = Object.keys(schedule[day]);
     categories.forEach(categoryKey => {
       if (categoryKey !== 'date' && categoryKey !== 'userLikes') {
         // loop over all of the events in the category
         schedule[day][categoryKey].forEach(event => {
-          let eventObj = {
+          const eventObj = {
             name: event.name ? event.name : event.title,
             latitude: event.location
               ? event.location.latitude
@@ -259,7 +259,7 @@ function generateEventsForSchedule(dbSchedule, schedule) {
           };
 
           dbConfig.addEvent(eventObj, (err, newEvent) => {
-            let newEventSchedule = {
+            const newEventSchedule = {
               id_schedule: dbSchedule.id,
               id_event: newEvent.id,
               dateTime: schedule[day]['date']
@@ -281,19 +281,23 @@ function generateEventsForSchedule(dbSchedule, schedule) {
 app.post('/user/:uid/schedule', (req, res) => {
   const uid = req.params.userId;
 
-  let schedule = { name: req.body.name };
+  const schedule = { name: req.body.name };
 
   dbConfig.createSchedule(schedule, (err, newSchedule) => {
     if (err) {
       res.send(err);
     }
     const userSchedule = { id_user: uid, id_schedule: newSchedule.id };
+    console.log('USER ID', uid, 'NEW SCHEDULE ID', newSchedule.id);
     dbConfig.createUserSchedule(userSchedule, (err, newUserSchedule) => {
       if (err) {
         res.send(err);
+      } else {
+        res.status(201).send(newUserSchedule);
       }
 
       generateEventsForSchedule(newSchedule, req.body);
+      console.log('REQ.BODY', req.body);
     });
   });
 });
