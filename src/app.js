@@ -133,7 +133,6 @@ app.get('/user/:uid/likes', (req, res) => {
 
 app.post('/user_like', (req, res) => {
   const userLike = req.body;
-  console.log('REQ.BODY', req.body.name);
   dbConfig.addUserLike(userLike, (err, userLike) => {
     if (err) {
       res.send(err);
@@ -279,7 +278,7 @@ function generateEventsForSchedule(dbSchedule, schedule) {
 }
 
 app.post('/user/:uid/schedule', (req, res) => {
-  const uid = req.params.userId;
+  const uid = req.params.uid;
 
   const schedule = { name: req.body.name };
 
@@ -288,7 +287,6 @@ app.post('/user/:uid/schedule', (req, res) => {
       res.send(err);
     }
     const userSchedule = { id_user: uid, id_schedule: newSchedule.id };
-    console.log('USER ID', uid, 'NEW SCHEDULE ID', newSchedule.id);
     dbConfig.createUserSchedule(userSchedule, (err, newUserSchedule) => {
       if (err) {
         res.send(err);
@@ -297,7 +295,6 @@ app.post('/user/:uid/schedule', (req, res) => {
       }
 
       generateEventsForSchedule(newSchedule, req.body);
-      console.log('REQ.BODY', req.body);
     });
   });
 });
