@@ -363,7 +363,7 @@ module.exports = {
   },
 
   createUserSchedule: (userSchedule, callback) => {
-    UserSchedule.create(userSchedule, { fields: ['id_user', 'id_schedule'] })
+    UserSchedule.create(userSchedule, { fields: [ 'id_user', 'id_schedule'] })
       .then(schedule => {
         callback(null, schedule);
       })
