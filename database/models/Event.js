@@ -15,9 +15,10 @@ const sequelize = require('../database');
 
 // define Event
 const Event = sequelize.define('event', {
+  name: Sequelize.STRING,
   latitude: Sequelize.FLOAT,
   longitude: Sequelize.FLOAT,
-  name: Sequelize.STRING,
+  startTime: Sequelize.INTEGER,
   googleId: Sequelize.STRING
 });
 
