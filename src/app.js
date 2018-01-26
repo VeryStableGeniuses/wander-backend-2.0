@@ -316,6 +316,25 @@ app.delete('/schedule', (req, res) => {
   });
 });
 
+app.post('join_schedule', (req, res) => {
+  // // Grab out the scheduleId and the email of the person to be added
+  // const { scheduleId, userEmail } = req.body;
+  // // Find the target user by their email
+  // dbConfig.getuserByEmail(userEmail, (err, user) => {
+  //   // Once we find the user, call createUserSchedule to add an entry to the user_schedule join table
+  //   dbConfig.createUserSchedule({ id_schedule: scheduleId, id_user: user.id }, (err, dbResponse) => {
+  //     if (err) {
+  //       // If unsuccessful, set the status and send an error
+  //       res.status(400).send(err);
+  //     } else {
+  //       // Send the response back if successful
+  //       res.status(201).send(dbResponse);
+  //     }
+  //   });
+  // });
+  res.status(200).send('success!');
+});
+
 app.get('/event_schedules', (req, res) => {
   dbConfig.getEventSchedule((err, eventSchedules) => {
     if (err) {
