@@ -316,6 +316,17 @@ app.delete('/schedule', (req, res) => {
   });
 });
 
+app.post('join_schedule', (req, res) => {
+  const { scheduleId, userId } = req.body;
+  dbConfig.createUserSchedule({ id_user: scheduleId, id_schedule: userId }, (err, dbResponse) => {
+    if (err) {
+      res.status(400).send(err);
+    } else {
+      res.status(201).send(dbResponse);
+    }
+  });
+});
+
 app.get('/event_schedules', (req, res) => {
   dbConfig.getEventSchedule((err, eventSchedules) => {
     if (err) {
