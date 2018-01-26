@@ -138,7 +138,7 @@ module.exports = {
   },
 
   addUserLike: (userLike, callback) => {
-    console.log('user like', userLike);
+    console.log('user like ', userLike);
     UserLike.create(userLike, { fields: ['id_type', 'id_user', 'like'] })
       .then(userLike => {
         callback(null, userLike);

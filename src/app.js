@@ -80,7 +80,6 @@ app.post('/signup', (req, res) => {
 
 app.get('/dashboard', passport.authenticate('jwt', { session: false }), (req, res) => {
   // route on dashboard that'll get all schedules tied to a user.
-  console.log(`user ID ${req.user.id}`);
   dbConfig.getSchedulesForUser(req.user.id, (err, schedules) => {
     if (err) {
       console.log(`db get schedules error ${err}`);
@@ -89,7 +88,6 @@ app.get('/dashboard', passport.authenticate('jwt', { session: false }), (req, re
     }
   });
 });
-
 
 app.get('/logout', (req, res) => {
   res.json('You are logged out');
@@ -126,8 +124,8 @@ app.get('/users', (req, res) => {
   });
 });
 
-app.get('/user/:uid/likes', (req, res) => {
-  let userId = req.params.uid;
+app.get('/user/likes', passport.authenticate('jwt', { session: false }), (req, res) => {
+  let userId = req.user.id;
   dbConfig.getUserLikes(userId, (err, likes) => {
     if (err) {
       res.send(err);
@@ -137,8 +135,11 @@ app.get('/user/:uid/likes', (req, res) => {
   });
 });
 
-app.post('/user_like', (req, res) => {
+app.post('/user_like', passport.authenticate('jwt', { session: false }), (req, res) => {
   let userLike = req.body;
+  const userId = req.user.id;
+  userLike.id_user = userId;
+  userLike.like = true;
   dbConfig.addUserLike(userLike, (err, userLike) => {
     if (err) {
       res.send(err);
