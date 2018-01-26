@@ -10,8 +10,6 @@ module.exports = function (passport) {
     jwtFromRequest: ExtractJwt.fromHeader('authorization'),
     secretOrKey: process.env.LOCALSECRET
   }, (payload, done) => {
-    // console.log('this is payload id ', payload.id);
-    // console.log('this is payload ', payload);
     
     dbUser.findById(payload.id)
       .then((user) => {

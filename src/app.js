@@ -124,13 +124,8 @@ app.get('/users', (req, res) => {
   });
 });
 
-<<<<<<< HEAD
 app.get('/user/likes', passport.authenticate('jwt', { session: false }), (req, res) => {
   let userId = req.user.id;
-=======
-app.get('/user/:uid/likes', (req, res) => {
-  const userId = req.params.uid;
->>>>>>> 7741975e43a0ce0a14551e8669bf964a003adc52
   dbConfig.getUserLikes(userId, (err, likes) => {
     if (err) {
       res.send(err);
@@ -140,16 +135,10 @@ app.get('/user/:uid/likes', (req, res) => {
   });
 });
 
-<<<<<<< HEAD
 app.post('/user_like', passport.authenticate('jwt', { session: false }), (req, res) => {
   let userLike = req.body;
-  const userId = req.user.id;
-  userLike.id_user = userId;
+  userLike.id_user = req.user.id;
   userLike.like = true;
-=======
-app.post('/user_like', (req, res) => {
-  const userLike = req.body;
->>>>>>> 7741975e43a0ce0a14551e8669bf964a003adc52
   dbConfig.addUserLike(userLike, (err, userLike) => {
     if (err) {
       res.send(err);
@@ -238,9 +227,9 @@ app.post('/user_schedule', (req, res) => {
   });
 });
 
-app.get('/user/:sid/schedule', (req, res) => {
-  const sid = req.params.sid;
-  dbConfig.getSchedulesForUser(sid, (err, schedule) => {
+app.get('/user/schedules', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const uid = req.user.uid;
+  dbConfig.getSchedulesForUser(uid, (err, schedule) => {
     if (err) {
       res.send(err);
     } else {
@@ -294,8 +283,8 @@ function generateEventsForSchedule(dbSchedule, schedule) {
   });
 }
 
-app.post('/user/:uid/schedule', (req, res) => {
-  const uid = req.params.uid;
+app.post('/user/schedule', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const uid = req.user.id;
 
   const schedule = { name: req.body.name };
 

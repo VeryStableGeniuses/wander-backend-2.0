@@ -138,10 +138,6 @@ module.exports = {
   },
 
   addUserLike: (userLike, callback) => {
-<<<<<<< HEAD
-    console.log('user like ', userLike);
-=======
->>>>>>> 7741975e43a0ce0a14551e8669bf964a003adc52
     UserLike.create(userLike, { fields: ['id_type', 'id_user', 'like'] })
       .then(userLike => {
         callback(null, userLike);
