@@ -228,7 +228,7 @@ app.post('/user_schedule', (req, res) => {
 });
 
 app.get('/user/schedules', passport.authenticate('jwt', { session: false }), (req, res) => {
-  const uid = req.user.uid;
+  const uid = req.user.id;
   dbConfig.getSchedulesForUser(uid, (err, schedule) => {
     if (err) {
       res.send(err);
