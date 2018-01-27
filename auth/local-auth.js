@@ -1,9 +1,7 @@
 require('dotenv').config;
 const JwtStrategy = require('passport-jwt').Strategy,
-  // LocalStrategy = require('passport-local').Strategy,
   ExtractJwt = require('passport-jwt').ExtractJwt,
   dbUser= require('../database/models/User');
-  // dbConfig = require('../database/db-helpers');
 
 
 module.exports = function (passport) {
@@ -12,8 +10,6 @@ module.exports = function (passport) {
     jwtFromRequest: ExtractJwt.fromHeader('authorization'),
     secretOrKey: process.env.LOCALSECRET
   }, (payload, done) => {
-    // console.log('this is payload id ', payload.id);
-    // console.log('this is payload ', payload);
     
     dbUser.findById(payload.id)
       .then((user) => {

@@ -361,7 +361,7 @@ module.exports = {
   },
 
   createUserSchedule: (userSchedule, callback) => {
-    UserSchedule.create(userSchedule, { fields: [ 'id_user', 'id_schedule', 'status'] })
+    UserSchedule.create(userSchedule, { fields: [ 'status', 'id_user', 'id_schedule'] })
       .then(schedule => {
         callback(null, schedule);
       })
@@ -518,3 +518,5 @@ module.exports = {
       });
   }
 };
+
+//
