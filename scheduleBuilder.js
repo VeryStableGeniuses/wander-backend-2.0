@@ -155,9 +155,9 @@ const scheduleBuilder = (startDate, endDate, google, restaurantData, predictHQ, 
     for (let i = 0; i < 4; i++) {
       schedule[day].restaurants.push(findRestaurant(schedule[day].events[0], 0, restaurantData));
     }
-    schedule[day].date = new Date(currentDate);
+    schedule[day].date = new Date(currentDate); 
+    schedule[day].userLikes = interests;
     currentDate.setDate(currentDate.getDate() + 1);
-
   });
   return schedule;
 };
