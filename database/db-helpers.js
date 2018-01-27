@@ -381,7 +381,12 @@ module.exports = {
   getSchedulesForUser: (uid, callback) => {
     UserSchedule.findAll({ where: { id_user: uid } })
       .then(userSchedules => {
-        callback(null, userSchedules);
+        return Promise.all(userSchedules.map(schedule => Schedule.findAll({ where: { id : schedule.id_schedule } })))
+          .then((schedulesArr) => {
+            schedulesArr.forEach(schedule => schedule.status = 'creator');
+            callback(null, schedulesArr);
+          })
+          .catch(error => callback(error));
       })
       .catch(err => {
         callback(err);
