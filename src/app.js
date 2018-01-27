@@ -239,7 +239,7 @@ app.get('/user/schedules', passport.authenticate('jwt', { session: false }), (re
 });
 
 
-function generateEventsForSchedule(dbSchedule, schedule, callback) {
+function generateEventsForSchedule(dbSchedule, schedule) {
   delete schedule.name; // remove the schedule name, we already saved it on the db schedule
 
   const days = Object.keys(schedule);
@@ -274,7 +274,6 @@ function generateEventsForSchedule(dbSchedule, schedule, callback) {
               newEventSchedule,
               (err, newEventSchedule) => {
                 console.log('added scheduled event:', newEventSchedule);
-                callback('success');
               }
             );
           });
@@ -287,7 +286,7 @@ function generateEventsForSchedule(dbSchedule, schedule, callback) {
 app.post('/user/schedule', passport.authenticate('jwt', { session: false }), (req, res) => {
   const uid = req.user.id;
 
-  const schedule = { name: req.body.name };
+  const schedule = { name: req.body.schedule.name };
 
   dbConfig.createSchedule(schedule, (err, newSchedule) => {
     if (err) {
@@ -295,15 +294,13 @@ app.post('/user/schedule', passport.authenticate('jwt', { session: false }), (re
     }
     const userSchedule = { id_user: uid, id_schedule: newSchedule.id };
     dbConfig.createUserSchedule(userSchedule, (err, newUserSchedule) => {
-      // if (err) {
-      //   res.send(err);
-      // } else {
-      //   res.status(201).send(newUserSchedule);
-      // }
-
-      generateEventsForSchedule(newSchedule, req.body, () => {
+      if (err) {
+        res.send(err);
+      } else {
         res.status(201).send(newUserSchedule);
-      });
+      }
+
+      generateEventsForSchedule(newSchedule, req.body.schedule);
     });
   });
 });
