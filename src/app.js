@@ -80,7 +80,6 @@ app.post('/signup', (req, res) => {
 
 app.get('/dashboard', passport.authenticate('jwt', { session: false }), (req, res) => {
   // route on dashboard that'll get all schedules tied to a user.
-  console.log(`user ID ${req.user.id}`);
   dbConfig.getSchedulesForUser(req.user.id, (err, schedules) => {
     if (err) {
       console.log(`db get schedules error ${err}`);
@@ -89,7 +88,6 @@ app.get('/dashboard', passport.authenticate('jwt', { session: false }), (req, re
     }
   });
 });
-
 
 app.get('/logout', (req, res) => {
   res.json('You are logged out');
@@ -126,8 +124,8 @@ app.get('/users', (req, res) => {
   });
 });
 
-app.get('/user/:uid/likes', (req, res) => {
-  const userId = req.params.uid;
+app.get('/user/likes', passport.authenticate('jwt', { session: false }), (req, res) => {
+  let userId = req.user.id;
   dbConfig.getUserLikes(userId, (err, likes) => {
     if (err) {
       res.send(err);
@@ -137,8 +135,10 @@ app.get('/user/:uid/likes', (req, res) => {
   });
 });
 
-app.post('/user_like', (req, res) => {
-  const userLike = req.body;
+app.post('/user_like', passport.authenticate('jwt', { session: false }), (req, res) => {
+  let userLike = req.body;
+  userLike.id_user = req.user.id;
+  userLike.like = true;
   dbConfig.addUserLike(userLike, (err, userLike) => {
     if (err) {
       res.send(err);
@@ -227,9 +227,9 @@ app.post('/user_schedule', (req, res) => {
   });
 });
 
-app.get('/user/:sid/schedule', (req, res) => {
-  const sid = req.params.sid;
-  dbConfig.getSchedulesForUser(sid, (err, schedule) => {
+app.get('/user/schedules', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const uid = req.user.uid;
+  dbConfig.getSchedulesForUser(uid, (err, schedule) => {
     if (err) {
       res.send(err);
     } else {
@@ -283,8 +283,8 @@ function generateEventsForSchedule(dbSchedule, schedule) {
   });
 }
 
-app.post('/user/:uid/schedule', (req, res) => {
-  const uid = req.params.uid;
+app.post('/user/schedule', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const uid = req.user.id;
 
   const schedule = { name: req.body.name };
 
