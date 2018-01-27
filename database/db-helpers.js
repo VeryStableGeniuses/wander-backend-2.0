@@ -403,7 +403,7 @@ module.exports = {
       .then(found => {
         return found.destroy().save();
       })
-      .then(success => callback(null, 'success'))
+      .then(success => callback(null, success))
       .catch(err => callback(err));
   },
 
