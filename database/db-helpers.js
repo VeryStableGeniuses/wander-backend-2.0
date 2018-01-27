@@ -371,8 +371,10 @@ module.exports = {
   },
 
   updateUserSchedule: (userId, scheduleId, callback) => {
-    UserSchedule.findOne({ where: {id_user: userId, id_schedule: scheduleId }})
-      .then(schedule => callback(null, schedule))
+    UserSchedule.update({ status: 'attending' }, { where: {id_user: userId, id_schedule: scheduleId }})
+      .then((schedule) => {
+        callback(null, schedule);
+      })
       .catch(err => callback(err));
   },
 
