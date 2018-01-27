@@ -361,7 +361,7 @@ module.exports = {
   },
 
   createUserSchedule: (userSchedule, callback) => {
-    UserSchedule.create(userSchedule, { fields: [ 'id_user', 'id_schedule'] })
+    UserSchedule.create(userSchedule, { fields: [ 'id_user', 'id_schedule', 'status'] })
       .then(schedule => {
         callback(null, schedule);
       })
@@ -369,6 +369,13 @@ module.exports = {
         callback(err);
       });
   },
+
+  updateUserSchedule: (userId, scheduleId, callback) => {
+    UserSchedule.findOne({ where: {id_user: userId, id_schedule: scheduleId }})
+      .then(schedule => callback(null, schedule))
+      .catch(err => callback(err));
+  },
+
   getSchedulesForUser: (uid, callback) => {
     UserSchedule.findAll({ where: { id_user: uid } })
       .then(userSchedules => {
@@ -389,17 +396,13 @@ module.exports = {
       });
   },
 
-  deleteUserSchedule: (userSchedule, callback) => {
-    UserSchedule.findById(userSchedule.id)
+  deleteUserSchedule: (uid, sid, callback) => {
+    UserSchedule.find( { where: { id_user: uid, id_schedule: sid} })
       .then(found => {
         return found.destroy().save();
       })
-      .then(() => {
-        callback(null);
-      })
-      .catch(err => {
-        callback(err);
-      });
+      .then(success => callback(null, 'success'))
+      .catch(err => callback(err));
   },
 
   getEventsForSchedule: (sid, callback) => {
