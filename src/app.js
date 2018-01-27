@@ -24,7 +24,6 @@ app.get('/', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  console.log('login hit');
   const email = req.body.email;
   const password = req.body.password;
   dbConfig.getuserByEmail(email, (err, user) => {
@@ -139,6 +138,7 @@ app.post('/user_like', passport.authenticate('jwt', { session: false }), (req, r
   let userLike = req.body;
   userLike.id_user = req.user.id;
   userLike.like = true;
+
   dbConfig.addUserLike(userLike, (err, userLike) => {
     if (err) {
       res.send(err);
@@ -239,7 +239,7 @@ app.get('/user/schedules', passport.authenticate('jwt', { session: false }), (re
 });
 
 
-function generateEventsForSchedule(dbSchedule, schedule) {
+function generateEventsForSchedule(dbSchedule, schedule, callback) {
   delete schedule.name; // remove the schedule name, we already saved it on the db schedule
 
   const days = Object.keys(schedule);
@@ -272,8 +272,9 @@ function generateEventsForSchedule(dbSchedule, schedule) {
 
             dbConfig.addEventSchedule(
               newEventSchedule,
-              (err, req, res, newEventSchedule) => {
+              (err, newEventSchedule) => {
                 console.log('added scheduled event:', newEventSchedule);
+                callback('success');
               }
             );
           });
@@ -294,13 +295,15 @@ app.post('/user/schedule', passport.authenticate('jwt', { session: false }), (re
     }
     const userSchedule = { id_user: uid, id_schedule: newSchedule.id };
     dbConfig.createUserSchedule(userSchedule, (err, newUserSchedule) => {
-      if (err) {
-        res.send(err);
-      } else {
-        res.status(201).send(newUserSchedule);
-      }
+      // if (err) {
+      //   res.send(err);
+      // } else {
+      //   res.status(201).send(newUserSchedule);
+      // }
 
-      generateEventsForSchedule(newSchedule, req.body);
+      generateEventsForSchedule(newSchedule, req.body, () => {
+        res.status(201).send(newUserSchedule);
+      });
     });
   });
 });
