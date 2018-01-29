@@ -303,7 +303,7 @@ app.post('/user/schedule', passport.authenticate('jwt', { session: false }), (re
     if (err) {
       res.send(err);
     }
-    const userSchedule = { id_user: uid, id_schedule: newSchedule.id };
+    const userSchedule = { id_user: uid, id_schedule: newSchedule.id, status: 'creator' };
     dbConfig.createUserSchedule(userSchedule, (err, newUserSchedule) => {
       if (err) {
         res.send(err);
