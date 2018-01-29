@@ -369,10 +369,24 @@ module.exports = {
         callback(err);
       });
   },
+
+  updateUserSchedule: (userId, scheduleId, callback) => {
+    UserSchedule.update({ status: 'attending' }, { where: {id_user: userId, id_schedule: scheduleId }})
+      .then((schedule) => {
+        callback(null, schedule);
+      })
+      .catch(err => callback(err));
+  },
+
   getSchedulesForUser: (uid, callback) => {
     UserSchedule.findAll({ where: { id_user: uid } })
       .then(userSchedules => {
-        callback(null, userSchedules);
+        return Promise.all(userSchedules.map(schedule => Schedule.findAll({ where: { id : schedule.id_schedule } })))
+          .then((schedulesArr) => {
+            schedulesArr.forEach(schedule => schedule.status = 'creator');
+            callback(null, schedulesArr);
+          })
+          .catch(error => callback(error));
       })
       .catch(err => {
         callback(err);
@@ -389,17 +403,13 @@ module.exports = {
       });
   },
 
-  deleteUserSchedule: (userSchedule, callback) => {
-    UserSchedule.findById(userSchedule.id)
+  deleteUserSchedule: (uid, sid, callback) => {
+    UserSchedule.find( { where: { id_user: uid, id_schedule: sid} })
       .then(found => {
         return found.destroy().save();
       })
-      .then(() => {
-        callback(null);
-      })
-      .catch(err => {
-        callback(err);
-      });
+      .then(success => callback(null, success))
+      .catch(err => callback(err));
   },
 
   getEventsForSchedule: (sid, callback) => {

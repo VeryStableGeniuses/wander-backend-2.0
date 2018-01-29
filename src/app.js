@@ -24,7 +24,6 @@ app.get('/', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  console.log('login hit');
   const email = req.body.email;
   const password = req.body.password;
   dbConfig.getuserByEmail(email, (err, user) => {
@@ -140,6 +139,7 @@ app.post('/user_like', passport.authenticate('jwt', { session: false }), (req, r
   // userLike.id_type = req.type.id;
   userLike.id_user = req.user.id;
   userLike.like = true;
+
   dbConfig.addUserLike(userLike, (err, userLike) => {
     if (err) {
       res.send(err);
@@ -273,7 +273,7 @@ function generateEventsForSchedule(dbSchedule, schedule) {
 
             dbConfig.addEventSchedule(
               newEventSchedule,
-              (err, req, res, newEventSchedule) => {
+              (err, newEventSchedule) => {
                 console.log('added scheduled event:', newEventSchedule);
               }
             );
@@ -288,13 +288,13 @@ app.post('/user/schedule', passport.authenticate('jwt', { session: false }), (re
   const uid = req.user.id;
   console.log('THIS IS REQ.USER', req.user);
 
-  const schedule = { name: req.body.name };
+  const schedule = { name: req.body.schedule.name };
 
   dbConfig.createSchedule(schedule, (err, newSchedule) => {
     if (err) {
       res.send(err);
     }
-    const userSchedule = { id_user: uid, id_schedule: newSchedule.id };
+    const userSchedule = { id_user: uid, id_schedule: newSchedule.id, status: 'creator' };
     dbConfig.createUserSchedule(userSchedule, (err, newUserSchedule) => {
       if (err) {
         res.send(err);
@@ -302,7 +302,7 @@ app.post('/user/schedule', passport.authenticate('jwt', { session: false }), (re
         res.status(201).send(newUserSchedule);
       }
 
-      generateEventsForSchedule(newSchedule, req.body);
+      generateEventsForSchedule(newSchedule, req.body.schedule);
     });
   });
 });
@@ -318,23 +318,45 @@ app.delete('/schedule', (req, res) => {
   });
 });
 
-app.post('join_schedule', (req, res) => {
-  // // Grab out the scheduleId and the email of the person to be added
-  // const { scheduleId, userEmail } = req.body;
-  // // Find the target user by their email
-  // dbConfig.getuserByEmail(userEmail, (err, user) => {
-  //   // Once we find the user, call createUserSchedule to add an entry to the user_schedule join table
-  //   dbConfig.createUserSchedule({ id_schedule: scheduleId, id_user: user.id }, (err, dbResponse) => {
-  //     if (err) {
-  //       // If unsuccessful, set the status and send an error
-  //       res.status(400).send(err);
-  //     } else {
-  //       // Send the response back if successful
-  //       res.status(201).send(dbResponse);
-  //     }
-  //   });
-  // });
-  res.status(200).send('success!');
+app.post('/join_schedule', (req, res) => {
+  // Grab out the scheduleId and the email of the person to be added
+  const { scheduleId, userEmail } = req.body;
+  // Find the target user by their email
+  dbConfig.getuserByEmail(userEmail, (err, user) => {
+    // Once we find the user, call createUserSchedule to add an entry to the user_schedule join table
+    dbConfig.createUserSchedule({ id_schedule: scheduleId, id_user: user.id, status: 'invited' }, (err, dbResponse) => {
+      if (err) {
+        // If unsuccessful, set the status and send an error
+        res.status(400).send(err);
+      } else {
+        // Send the response back if successful
+        res.status(201).send(dbResponse);
+      }
+    });
+  });
+});
+
+app.post('/accept_invite', (req, res) => {
+  // Get the user id from the request. I've used my own as a placeholder
+  const userId = 18;
+  const { scheduleId, accepted } = req.body;
+  if (accepted === 'true') {
+    dbConfig.updateUserSchedule(userId, scheduleId, (err, response) => {
+      if (err) {
+        res.status(400).send(err);
+      } else {
+        res.status(204).send(response);
+      }
+    });
+  } else {
+    dbConfig.deleteUserSchedule(userId, scheduleId, (err, success) => {
+      if (err) {
+        res.status(400).send(err);
+      } else {
+        res.status(204).send(success);
+      }
+    });
+  }
 });
 
 app.get('/event_schedules', (req, res) => {
