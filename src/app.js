@@ -158,7 +158,7 @@ app.get('/events', (req, res) => {
   });
 });
 
-app.get('/event', (req, res) => {
+app.get('/event/:eid', (req, res) => {
   const eventId = req.params.eid;
   dbConfig.getEventById(eventId, (err, event) => {
     if (err) {

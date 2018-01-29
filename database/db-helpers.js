@@ -172,8 +172,8 @@ module.exports = {
       });
   },
 
-  getEventById: (event, callback) => {
-    Event.findById(event.id)
+  getEventById: (eventId, callback) => {
+    Event.findById(eventId)
       .then(event => {
         callback(null, event);
       })
@@ -402,7 +402,7 @@ module.exports = {
     Schedule.findById(scheduleId)
       .then(schedule => callback(null, schedule))
       .catch(err => callback(err));
-  }
+  },
 
   deleteUserSchedule: (uid, sid, callback) => {
     UserSchedule.find( { where: { id_user: uid, id_schedule: sid} })
@@ -526,5 +526,3 @@ module.exports = {
       });
   }
 };
-
-//
