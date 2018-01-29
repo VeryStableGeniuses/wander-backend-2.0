@@ -5,6 +5,11 @@
 
 const bcrypt = require('bcrypt-nodejs');
 
+const sequelize = require('./database'),
+  associations = require('./associations');
+
+// const scheduleBuilder = require('../scheduleBuilder');
+
 const {
   Type,
   User,
@@ -14,25 +19,25 @@ const {
   Schedule,
   Photo,
   Hometown,
-  UserHometown
-} = require('./database');
+  UserHometown,
+  UserSchedule
+} = require('./models/exports');
 
 module.exports = {
-  getTypes: callback => {
-    Type.findAll()
-      .then(types => {
-        callback(null, types);
+  addType: (type, callback) => {
+    Type.create(type, { fields: ['name'] })
+      .then(type => {
+        callback(null, type);
       })
       .catch(err => {
         callback(err);
       });
   },
 
-  addType: (type, callback) => {
-    console.log('adding type', type);
-    Type.create(type, { fields: ['name'] })
-      .then(type => {
-        callback(null, type);
+  getTypes: callback => {
+    Type.findAll()
+      .then(types => {
+        callback(null, types);
       })
       .catch(err => {
         callback(err);
@@ -54,7 +59,13 @@ module.exports = {
       bcrypt.hash(newUser.password, salt, null, (err, hash) => {
         if (err) throw err;
         newUser.password = hash;
-        newUser.save(callback);
+        User.create(newUser, { fields: ['name', 'password', 'email_address'] })
+          .then(user => {
+            callback(null, user.dataValues);
+          })
+          .catch(err => {
+            callback(err);
+          });
       });
     });
   },
@@ -77,9 +88,17 @@ module.exports = {
   },
 
   getuserByEmail: (email, callback) => {
-    User.findOne({email: email}, callback);
+    User.findOne({
+      where: { email_address: email }
+    })
+      .then(user => {
+        callback(null, user.dataValues);
+      })
+      .catch(err => {
+        callback(err);
+      });
   },
-    
+
   updateUser: (user, callback) => {
     User.findById(user.id)
       .then(found => {
@@ -108,11 +127,18 @@ module.exports = {
       });
   },
 
-  getUserLikes: (user, callback) => {
-    User.findById(user.id)
-      .then(user => {
-        return user.getUserLikes();
+  getUserLikes: (userId, callback) => {
+    UserLike.findAll({ where: { id_user: userId } })
+      .then(userLikes => {
+        callback(null, userLikes);
       })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  addUserLike: (userLike, callback) => {
+    UserLike.create(userLike, { fields: ['id_type', 'id_user', 'like'] })
       .then(userLike => {
         callback(null, userLike);
       })
@@ -125,7 +151,7 @@ module.exports = {
     UserLike.findById(userLike.id)
       .then(found => {
         return found
-          .update(userLike, { fields: ['id_type', 'id_user', 'like/dislike'] })
+          .update(userLike, { fields: ['id_type', 'id_user', 'like'] })
           .save();
       })
       .then(updatedUserLike => {
@@ -148,6 +174,25 @@ module.exports = {
 
   getEventById: (event, callback) => {
     Event.findById(event.id)
+      .then(event => {
+        callback(null, event);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  addEvent: (event, callback) => {
+    Event.create(event, {
+      fields: [
+        'id_type',
+        'latitude',
+        'longitude',
+        'startTime',
+        'googleId',
+        'name'
+      ]
+    })
       .then(event => {
         callback(null, event);
       })
@@ -197,6 +242,16 @@ module.exports = {
       });
   },
 
+  createSchedule: (schedule, callback) => {
+    Schedule.create(schedule, { fields: ['name'] })
+      .then(schedule => {
+        callback(null, schedule);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
   getSchedules: callback => {
     Schedule.findAll()
       .then(schedule => {
@@ -206,27 +261,6 @@ module.exports = {
         callback(err);
       });
   },
-  
-  createSchedule: (schedule, callback) => {
-    Schedule.create(schedule, { fields: ['name'] })
-      .then(schedule => {
-        callback(null, schedule);
-      })
-      .catch(err => {
-        callback(err);
-      });
-  },
-
-  // addType: (type, callback) => {
-  //   console.log('adding type', type);
-  //   Type.create(type, { fields: ['name'] })
-  //     .then(type => {
-  //       callback(null, type);
-  //     })
-  //     .catch(err => {
-  //       callback(err);
-  //     });
-  // },
 
   getScheduleById: (schedule, callback) => {
     Schedule.findById(schedule.id)
@@ -238,54 +272,40 @@ module.exports = {
       });
   },
 
-  // getUserById: (user, callback) => {
-  //   User.findById(user.id)
-  //     .then(user => {
-  //       callback(null, user);
-  //     })
-  //     .catch(err => {
-  //       callback(err);
-  //     });
-  // },
-
-  // updateUser: (user, callback) => {
-  //   User.findById(user.id)
-  //     .then(found => {
-  //       return found
-  //         .update(user, { fields: ['username', 'password', 'email_address'] })
-  //         .save();
-  //     })
-  //     .then(updatedUser => {
-  //       callback(null, updatedUser);
-  //     })
-  //     .catch(err => {
-  //       callback(err);
-  //     });
-  // },
-
-  createSchedule: (schedule, callback) => {
-    Schedule.create(schedule, { fields: ['name'] })
-      .then(schedule => {
-        callback(null, schedule);
-      })
-      .catch(err => {
-        callback(err);
-      });
-  },
-
-  // addType: (type, callback) => {
-  //   console.log('adding type', type);
-  //   Type.create(type, { fields: ['name'] })
-  //     .then(type => {
-  //       callback(null, type);
-  //     })
-  //     .catch(err => {
-  //       callback(err);
-  //     });
-  // },
-
-  getScheduleById: (schedule, callback) => {
+  updateSchedule: (schedule, callback) => {
     Schedule.findById(schedule.id)
+      .then(found => {
+        return found
+          .update(schedule, {
+            fields: ['name']
+          })
+          .save();
+      })
+      .then(updatedSchedule => {
+        callback(null, updatedSchedule);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  deleteSchedule: (schedule, callback) => {
+    Schedule.findById(schedule.id)
+      .then(found => {
+        return found.destroy().save();
+      })
+      .then(() => {
+        callback(null);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  addEventSchedule: (event, callback) => {
+    EventSchedule.create(event, {
+      fields: ['dateTime', 'id_event', 'id_schedule']
+    })
       .then(schedule => {
         callback(null, schedule);
       })
@@ -293,31 +313,6 @@ module.exports = {
         callback(err);
       });
   },
-
-  // getUserById: (user, callback) => {
-  //   User.findById(user.id)
-  //     .then(user => {
-  //       callback(null, user);
-  //     })
-  //     .catch(err => {
-  //       callback(err);
-  //     });
-  // },
-
-  // updateUser: (user, callback) => {
-  //   User.findById(user.id)
-  //     .then(found => {
-  //       return found
-  //         .update(user, { fields: ['username', 'password', 'email_address'] })
-  //         .save();
-  //     })
-  //     .then(updatedUser => {
-  //       callback(null, updatedUser);
-  //     })
-  //     .catch(err => {
-  //       callback(err);
-  //     });
-  // },
 
   getEventSchedule: (event, callback) => {
     Event.findById(event.id)
@@ -352,16 +347,77 @@ module.exports = {
       });
   },
 
-  getUserSchedule: (user, callback) => {
-    User.findById(user.id)
-      .then(user => {
-        return user.getUserSchedule();
+  deletescheduledEvent: (event, callback) => {
+    EventSchedule.findById(event.id)
+      .then(found => {
+        return found.destroy().save();
       })
-      .then(schedule => {
-        Schedule.findById(schedule.id);
+      .then(() => {
+        callback(null);
       })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  createUserSchedule: (userSchedule, callback) => {
+    UserSchedule.create(userSchedule, { fields: [ 'status', 'id_user', 'id_schedule'] })
       .then(schedule => {
-        return schedule.getUserSchedule();
+        callback(null, schedule);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  updateUserSchedule: (userId, scheduleId, callback) => {
+    UserSchedule.update({ status: 'attending' }, { where: {id_user: userId, id_schedule: scheduleId }})
+      .then((schedule) => {
+        callback(null, schedule);
+      })
+      .catch(err => callback(err));
+  },
+
+  getSchedulesForUser: (uid, callback) => {
+    UserSchedule.findAll({ where: { id_user: uid } })
+      .then(userSchedules => {
+        callback(null, userSchedules);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  getUserScheduleById: (userSchedule, callback) => {
+    UserSchedule.findById(userSchedule.id)
+      .then(userSchedule => {
+        callback(null, userSchedule);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  getSchedulesForDashboard: (scheduleId, callback) => {
+    Schedule.findById(scheduleId)
+      .then(schedule => callback(null, schedule))
+      .catch(err => callback(err));
+  }
+
+  deleteUserSchedule: (uid, sid, callback) => {
+    UserSchedule.find( { where: { id_user: uid, id_schedule: sid} })
+      .then(found => {
+        return found.destroy().save();
+      })
+      .then(success => callback(null, success))
+      .catch(err => callback(err));
+  },
+
+  getEventsForSchedule: (sid, callback) => {
+    EventSchedule.findAll({ where: { id_schedule: sid } })
+      // EventSchedule.findAll()
+      .then(events => {
+        callback(null, events);
       })
       .catch(err => {
         callback(err);
@@ -388,6 +444,16 @@ module.exports = {
       });
   },
 
+  addPhoto: (photo, callback) => {
+    Photo.create(photo, { fields: ['url'] })
+      .then(photo => {
+        callback(null, photo);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
   updatePhoto: (photo, callback) => {
     Photo.findById(photo.id)
       .then(found => {
@@ -395,6 +461,19 @@ module.exports = {
       })
       .then(updatedPhoto => {
         callback(null, updatedPhoto);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
+  deletePhoto: (photo, callback) => {
+    Photo.findById(photo.id)
+      .then(found => {
+        return found.destroy().save();
+      })
+      .then(() => {
+        callback(null);
       })
       .catch(err => {
         callback(err);
@@ -448,8 +527,4 @@ module.exports = {
   }
 };
 
-/** TODO:
- * get each row from a table by id (get user by id, etc.)
- * CRUD for each table (delete user, update user by id, get user by id, etc.)
- *
- */
+//
