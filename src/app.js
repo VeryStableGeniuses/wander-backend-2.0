@@ -191,6 +191,17 @@ app.get('/:sid/schedules', (req, res) => {
   });
 });
 
+app.get('/schedule/:sid', (req, res) => {
+  const scheduleId = req.params.sid;
+  dbConfig.getSchedulesForDashboard(scheduleId, (err, schedule) => {
+    if (err) {
+      res.status(404).send(err);
+    } else {
+      res.status(200).send(schedule);
+    }
+  });
+});
+
 // when you receive schedule, get all events tied to that schedule
 // create Schedule, scheduled events, etc. based on user_likes
 
