@@ -434,7 +434,7 @@ module.exports = {
   },
 
   addPhoto: (photo, callback) => {
-    Photo.create(photo, { fields: ['url'] })
+    Photo.create(photo, { fields: ['url', 'id_user'] })
       .then(photo => {
         callback(null, photo);
       })

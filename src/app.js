@@ -137,6 +137,7 @@ app.get('/user/likes', passport.authenticate('jwt', { session: false }), (req, r
 
 app.post('/user_like', passport.authenticate('jwt', { session: false }), (req, res) => {
   let userLike = req.body;
+  // userLike.id_type = req.type.id;
   userLike.id_user = req.user.id;
   userLike.like = true;
   dbConfig.addUserLike(userLike, (err, userLike) => {
@@ -285,6 +286,7 @@ function generateEventsForSchedule(dbSchedule, schedule) {
 
 app.post('/user/schedule', passport.authenticate('jwt', { session: false }), (req, res) => {
   const uid = req.user.id;
+  console.log('THIS IS REQ.USER', req.user);
 
   const schedule = { name: req.body.name };
 
