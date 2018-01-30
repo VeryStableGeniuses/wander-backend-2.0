@@ -137,7 +137,6 @@ app.get('/user/likes', passport.authenticate('jwt', { session: false }), (req, r
 app.post('/user_like', passport.authenticate('jwt', { session: false }), (req, res) => {
   let userLike = req.body;
   userLike.id_user = req.user.id;
-  userLike.like = true;
 
   dbConfig.addUserLike(userLike, (err, userLike) => {
     if (err) {
