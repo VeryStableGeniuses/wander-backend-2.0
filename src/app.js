@@ -57,22 +57,28 @@ app.post('/login', (req, res) => {
 });
 
 app.post('/signup', (req, res) => {
-  const newUser = new models.User({
-    name: req.body.username,
-    email_address: req.body.email,
-    password: req.body.password
-  });
-  dbConfig.createUser(newUser, (err, user) => {
-    if (err) {
-      res.json('User was not created');
+  dbConfig.getuserByEmail(req.body.email, (error, email) => {
+    if (email) {
+      return res.json('An account already exists using the Email Address');
     } else {
-      const tokenData = {
-        id: user.id,
-        name: user.name,
-        email_address: user.email_address,
-      };
-      const token = jwt.sign(tokenData, process.env.LOCALSECRET);
-      return res.json(token);
+      const newUser = new models.User({
+        name: req.body.username,
+        email_address: req.body.email,
+        password: req.body.password
+      });
+      dbConfig.createUser(newUser, (err, user) => {
+        if (err) {
+          res.json('User was not created');
+        } else {
+          const tokenData = {
+            id: user.id,
+            name: user.name,
+            email_address: user.email_address,
+          };
+          const token = jwt.sign(tokenData, process.env.LOCALSECRET);
+          return res.json(token);
+        }
+      });
     }
   });
 });
