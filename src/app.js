@@ -143,7 +143,6 @@ app.get('/user/likes', passport.authenticate('jwt', { session: false }), (req, r
 app.post('/user_like', passport.authenticate('jwt', { session: false }), (req, res) => {
   let userLike = req.body;
   userLike.id_user = req.user.id;
-  userLike.like = true;
 
   dbConfig.addUserLike(userLike, (err, userLike) => {
     if (err) {
@@ -164,7 +163,7 @@ app.get('/events', (req, res) => {
   });
 });
 
-app.get('/event', (req, res) => {
+app.get('/event/:eid', (req, res) => {
   const eventId = req.params.eid;
   dbConfig.getEventById(eventId, (err, event) => {
     if (err) {
@@ -193,6 +192,17 @@ app.get('/:sid/schedules', (req, res) => {
       res.send(err);
     } else {
       res.status(200).send(events);
+    }
+  });
+});
+
+app.get('/schedule/:sid', (req, res) => {
+  const scheduleId = req.params.sid;
+  dbConfig.getSchedulesForDashboard(scheduleId, (err, schedule) => {
+    if (err) {
+      res.status(404).send(err);
+    } else {
+      res.status(200).send(schedule);
     }
   });
 });
@@ -322,22 +332,34 @@ app.delete('/schedule', (req, res) => {
   });
 });
 
-app.post('/join_schedule', (req, res) => {
-  // Grab out the scheduleId and the email of the person to be added
-  const { scheduleId, userEmail } = req.body;
-  // Find the target user by their email
-  dbConfig.getuserByEmail(userEmail, (err, user) => {
-    // Once we find the user, call createUserSchedule to add an entry to the user_schedule join table
-    dbConfig.createUserSchedule({ id_schedule: scheduleId, id_user: user.id, status: 'invited' }, (err, dbResponse) => {
+app.post('/join_schedule', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const uid = req.user.id;
+  if (req.body.userEmail) {
+    // Grab out the scheduleId and the email of the person to be added
+    const { scheduleId, userEmail } = req.body;
+    // Find the target user by their email
+    dbConfig.getuserByEmail(userEmail, (err, user) => {
+      // Once we find the user, call createUserSchedule to add an entry to the user_schedule join table
+      dbConfig.createUserSchedule({ id_schedule: scheduleId, id_user: user.id, status: 'invited' }, (err, dbResponse) => {
+        if (err) {
+          // If unsuccessful, set the status and send an error
+          res.status(400).send(err);
+        } else {
+          // Send the response back if successful
+          res.status(201).send(dbResponse);
+        }
+      });
+    });
+  } else {
+    const { scheduleId } = req.body;
+    dbConfig.createUserSchedule({ id_schedule: scheduleId, id_user: uid, status: 'attending' }, (err, dbResponse) => {
       if (err) {
-        // If unsuccessful, set the status and send an error
         res.status(400).send(err);
       } else {
-        // Send the response back if successful
         res.status(201).send(dbResponse);
       }
     });
-  });
+  }
 });
 
 app.post('/accept_invite', (req, res) => {

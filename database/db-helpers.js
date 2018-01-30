@@ -172,8 +172,8 @@ module.exports = {
       });
   },
 
-  getEventById: (event, callback) => {
-    Event.findById(event.id)
+  getEventById: (eventId, callback) => {
+    Event.findById(eventId)
       .then(event => {
         callback(null, event);
       })
@@ -381,12 +381,7 @@ module.exports = {
   getSchedulesForUser: (uid, callback) => {
     UserSchedule.findAll({ where: { id_user: uid } })
       .then(userSchedules => {
-        return Promise.all(userSchedules.map(schedule => Schedule.findAll({ where: { id : schedule.id_schedule } })))
-          .then((schedulesArr) => {
-            schedulesArr.forEach(schedule => schedule.status = 'creator');
-            callback(null, schedulesArr);
-          })
-          .catch(error => callback(error));
+        callback(null, userSchedules);
       })
       .catch(err => {
         callback(err);
@@ -401,6 +396,12 @@ module.exports = {
       .catch(err => {
         callback(err);
       });
+  },
+
+  getSchedulesForDashboard: (scheduleId, callback) => {
+    Schedule.findById(scheduleId)
+      .then(schedule => callback(null, schedule))
+      .catch(err => callback(err));
   },
 
   deleteUserSchedule: (uid, sid, callback) => {
@@ -525,5 +526,3 @@ module.exports = {
       });
   }
 };
-
-//
