@@ -147,6 +147,20 @@ module.exports = {
       });
   },
 
+  deleteUserLike: (userLike, callback) => {
+    UserLike.destroy({
+      where: {
+        id_user: userLike.id_user,
+        id_type: userLike.id_type
+      }
+    })
+      .then(destroyed => {
+        callback(null, `record deleted ${destroyed}`);
+      }).catch(err => {
+        callback(err);
+      });
+  },
+
   updateUserLikes: (userLike, callback) => {
     UserLike.findById(userLike.id)
       .then(found => {

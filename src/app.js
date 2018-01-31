@@ -150,8 +150,23 @@ app.post(
   (req, res) => {
     let userLike = req.body;
     userLike.id_user = req.user.id;
-
     dbConfig.addUserLike(userLike, (err, userLike) => {
+      if (err) {
+        res.send(err);
+      } else {
+        res.status(201).send(userLike);
+      }
+    });
+  }
+);
+
+app.delete(
+  '/user_like',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    let userLike = req.body;
+    userLike.id_user = req.user.id;
+    dbConfig.deleteUserLike(userLike, (err, userLike) => {
       if (err) {
         res.send(err);
       } else {
