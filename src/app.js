@@ -30,7 +30,7 @@ app.post('/login', (req, res) => {
     const tokenData = {
       id: user.id,
       name: user.name,
-      email_address: user.email_address,
+      email_address: user.email_address
     };
     if (err) {
       throw err;
@@ -38,21 +38,17 @@ app.post('/login', (req, res) => {
     if (!user) {
       res.json('User does not exist');
     }
-    dbConfig.comparePassword(
-      password,
-      user.password,
-      (err, isMatch) => {
-        if (err) {
-          throw err;
-        }
-        if (isMatch) {
-          const token = jwt.sign(tokenData, process.env.LOCALSECRET);
-          res.json(`JWT ${token}`);
-        } else {
-          res.json('Password is incorrect');
-        }
+    dbConfig.comparePassword(password, user.password, (err, isMatch) => {
+      if (err) {
+        throw err;
       }
-    );
+      if (isMatch) {
+        const token = jwt.sign(tokenData, process.env.LOCALSECRET);
+        res.json(`JWT ${token}`);
+      } else {
+        res.json('Password is incorrect');
+      }
+    });
   });
 });
 
@@ -73,7 +69,7 @@ app.post('/signup', (req, res) => {
           const tokenData = {
             id: user.id,
             name: user.name,
-            email_address: user.email_address,
+            email_address: user.email_address
           };
           const token = jwt.sign(tokenData, process.env.LOCALSECRET);
           return res.json(token);
@@ -83,16 +79,20 @@ app.post('/signup', (req, res) => {
   });
 });
 
-app.get('/dashboard', passport.authenticate('jwt', { session: false }), (req, res) => {
-  // route on dashboard that'll get all schedules tied to a user.
-  dbConfig.getSchedulesForUser(req.user.id, (err, schedules) => {
-    if (err) {
-      console.log(`db get schedules error ${err}`);
-    } else {
-      res.status(200).send(schedules);
-    }
-  });
-});
+app.get(
+  '/dashboard',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    // route on dashboard that'll get all schedules tied to a user.
+    dbConfig.getSchedulesForUser(req.user.id, (err, schedules) => {
+      if (err) {
+        console.log(`db get schedules error ${err}`);
+      } else {
+        res.status(200).send(schedules);
+      }
+    });
+  }
+);
 
 app.get('/logout', (req, res) => {
   res.json('You are logged out');
@@ -129,30 +129,37 @@ app.get('/users', (req, res) => {
   });
 });
 
-app.get('/user/likes', passport.authenticate('jwt', { session: false }), (req, res) => {
-  let userId = req.user.id;
-  dbConfig.getUserLikes(userId, (err, likes) => {
-    if (err) {
-      res.send(err);
-    } else {
-      res.status(200).send(likes);
-    }
-  });
-});
+app.get(
+  '/user/likes',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    let userId = req.user.id;
+    dbConfig.getUserLikes(userId, (err, likes) => {
+      if (err) {
+        res.send(err);
+      } else {
+        res.status(200).send(likes);
+      }
+    });
+  }
+);
 
-app.post('/user_like', passport.authenticate('jwt', { session: false }), (req, res) => {
-  let userLike = req.body;
-  // userLike.id_type = req.type.id;
-  userLike.id_user = req.user.id;
+app.post(
+  '/user_like',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    let userLike = req.body;
+    userLike.id_user = req.user.id;
 
-  dbConfig.addUserLike(userLike, (err, userLike) => {
-    if (err) {
-      res.send(err);
-    } else {
-      res.status(201).send(userLike);
-    }
-  });
-});
+    dbConfig.addUserLike(userLike, (err, userLike) => {
+      if (err) {
+        res.send(err);
+      } else {
+        res.status(201).send(userLike);
+      }
+    });
+  }
+);
 
 app.get('/events', (req, res) => {
   dbConfig.getEvents((err, events) => {
@@ -244,17 +251,20 @@ app.post('/user_schedule', (req, res) => {
   });
 });
 
-app.get('/user/schedules', passport.authenticate('jwt', { session: false }), (req, res) => {
-  const uid = req.user.id;
-  dbConfig.getSchedulesForUser(uid, (err, schedule) => {
-    if (err) {
-      res.send(err);
-    } else {
-      res.status(200).send(schedule);
-    }
-  });
-});
-
+app.get(
+  '/user/schedules',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    const uid = req.user.id;
+    dbConfig.getSchedulesForUser(uid, (err, schedule) => {
+      if (err) {
+        res.send(err);
+      } else {
+        res.status(200).send(schedule);
+      }
+    });
+  }
+);
 
 function generateEventsForSchedule(dbSchedule, schedule) {
   delete schedule.name; // remove the schedule name, we already saved it on the db schedule
@@ -300,28 +310,35 @@ function generateEventsForSchedule(dbSchedule, schedule) {
   });
 }
 
-app.post('/user/schedule', passport.authenticate('jwt', { session: false }), (req, res) => {
-  const uid = req.user.id;
-  console.log('THIS IS REQ.USER', req.user);
+app.post(
+  '/user/schedule',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    const uid = req.user.id;
 
-  const schedule = { name: req.body.schedule.name };
+    const schedule = { name: req.body.schedule.name };
 
-  dbConfig.createSchedule(schedule, (err, newSchedule) => {
-    if (err) {
-      res.send(err);
-    }
-    const userSchedule = { id_user: uid, id_schedule: newSchedule.id, status: 'creator' };
-    dbConfig.createUserSchedule(userSchedule, (err, newUserSchedule) => {
+    dbConfig.createSchedule(schedule, (err, newSchedule) => {
       if (err) {
         res.send(err);
-      } else {
-        res.status(201).send(newUserSchedule);
       }
+      const userSchedule = {
+        id_user: uid,
+        id_schedule: newSchedule.id,
+        status: 'creator'
+      };
+      dbConfig.createUserSchedule(userSchedule, (err, newUserSchedule) => {
+        if (err) {
+          res.send(err);
+        } else {
+          res.status(201).send(newUserSchedule);
+        }
 
-      generateEventsForSchedule(newSchedule, req.body.schedule);
+        generateEventsForSchedule(newSchedule, req.body.schedule);
+      });
     });
-  });
-});
+  }
+);
 
 app.delete('/schedule', (req, res) => {
   const schedule = req.body;
@@ -334,35 +351,45 @@ app.delete('/schedule', (req, res) => {
   });
 });
 
-app.post('/join_schedule', passport.authenticate('jwt', { session: false }), (req, res) => {
-  const uid = req.user.id;
-  if (req.body.userEmail) {
-    // Grab out the scheduleId and the email of the person to be added
-    const { scheduleId, userEmail } = req.body;
-    // Find the target user by their email
-    dbConfig.getuserByEmail(userEmail, (err, user) => {
-      // Once we find the user, call createUserSchedule to add an entry to the user_schedule join table
-      dbConfig.createUserSchedule({ id_schedule: scheduleId, id_user: user.id, status: 'invited' }, (err, dbResponse) => {
-        if (err) {
-          // If unsuccessful, set the status and send an error
-          res.status(400).send(err);
-        } else {
-          // Send the response back if successful
-          res.status(201).send(dbResponse);
-        }
+app.post(
+  '/join_schedule',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    const uid = req.user.id;
+    if (req.body.userEmail) {
+      // Grab out the scheduleId and the email of the person to be added
+      const { scheduleId, userEmail } = req.body;
+      // Find the target user by their email
+      dbConfig.getuserByEmail(userEmail, (err, user) => {
+        // Once we find the user, call createUserSchedule to add an entry to the user_schedule join table
+        dbConfig.createUserSchedule(
+          { id_schedule: scheduleId, id_user: user.id, status: 'invited' },
+          (err, dbResponse) => {
+            if (err) {
+              // If unsuccessful, set the status and send an error
+              res.status(400).send(err);
+            } else {
+              // Send the response back if successful
+              res.status(201).send(dbResponse);
+            }
+          }
+        );
       });
-    });
-  } else {
-    const { scheduleId } = req.body;
-    dbConfig.createUserSchedule({ id_schedule: scheduleId, id_user: uid, status: 'attending' }, (err, dbResponse) => {
-      if (err) {
-        res.status(400).send(err);
-      } else {
-        res.status(201).send(dbResponse);
-      }
-    });
+    } else {
+      const { scheduleId } = req.body;
+      dbConfig.createUserSchedule(
+        { id_schedule: scheduleId, id_user: uid, status: 'attending' },
+        (err, dbResponse) => {
+          if (err) {
+            res.status(400).send(err);
+          } else {
+            res.status(201).send(dbResponse);
+          }
+        }
+      );
+    }
   }
-});
+);
 
 app.post('/accept_invite', (req, res) => {
   // Get the user id from the request. I've used my own as a placeholder
@@ -419,17 +446,6 @@ app.delete('/event_schedule', (req, res) => {
   });
 });
 
-app.get('/photo', (req, res) => {
-  const pid = req.photo.id;
-  dbConfig.getPhotoById(pid, (err, photo) => {
-    if (err) {
-      res.send(err);
-    } else {
-      res.status(200).send(photo);
-    }
-  });
-});
-
 app.get('/photos', (req, res) => {
   dbConfig.getPhotos((err, photos) => {
     if (err) {
@@ -440,19 +456,31 @@ app.get('/photos', (req, res) => {
   });
 });
 
-app.patch('/photo', (req, res) => {
-  const photo = req.body;
-  dbConfig.updatePhoto(photo, (err, updatedPhoto) => {
-    if(err) {
+app.get('/photo', (req, res) => {
+  // let uid = req.user.id;
+  let uid = 85; // just hardcode user id for now
+
+  dbConfig.getPhotoByUid(uid, (err, photo) => {
+    if (err) {
       res.send(err);
     } else {
-      res.status(204).send(updatedPhoto);
+      res.status(200).send(photo);
     }
   });
 });
 
 app.post('/photo', (req, res) => {
   let photo = req.body;
+  // photo.id_user = req.user.id;
+  photo.id_user = 85; // just hardcode user id for now
+
+  /* photo object will look like:
+	* {
+	*		url: https://aws.blahblah/photo,
+	*	  id_user: 7
+	*	}
+	*/
+
   dbConfig.addPhoto(photo, (err, newPhoto) => {
     if (err) {
       res.send(err);
@@ -464,7 +492,7 @@ app.post('/photo', (req, res) => {
 
 // route for handling 404 requests(unavailable routes)
 app.use(function(req, res) {
-  res.status(404).send('Sorry, can\'t find that!');
+  res.status(404).send('Sorry can\'t find that!');
 });
 
 app.listen(PORT, () => {
