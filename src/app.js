@@ -391,12 +391,34 @@ app.delete('/event_schedule', (req, res) => {
   });
 });
 
+app.get('/photo', (req, res) => {
+  const pid = req.photo.id;
+  dbConfig.getPhotoById(pid, (err, photo) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.status(200).send(photo);
+    }
+  });
+});
+
 app.get('/photos', (req, res) => {
   dbConfig.getPhotos((err, photos) => {
     if (err) {
       res.send(err);
     } else {
       res.status(200).send(photos);
+    }
+  });
+});
+
+app.patch('/photo', (req, res) => {
+  const photo = req.body;
+  dbConfig.updatePhoto(photo, (err, updatedPhoto) => {
+    if(err) {
+      res.send(err);
+    } else {
+      res.status(204).send(updatedPhoto);
     }
   });
 });
@@ -414,7 +436,7 @@ app.post('/photo', (req, res) => {
 
 // route for handling 404 requests(unavailable routes)
 app.use(function(req, res) {
-  res.status(404).send('Sorry can\'t find that!');
+  res.status(404).send('Sorry, can\'t find that!');
 });
 
 app.listen(PORT, () => {
