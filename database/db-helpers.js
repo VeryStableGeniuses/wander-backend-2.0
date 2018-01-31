@@ -361,7 +361,9 @@ module.exports = {
   },
 
   createUserSchedule: (userSchedule, callback) => {
-    UserSchedule.create(userSchedule, { fields: [ 'status', 'id_user', 'id_schedule'] })
+    UserSchedule.create(userSchedule, {
+      fields: ['status', 'id_user', 'id_schedule']
+    })
       .then(schedule => {
         callback(null, schedule);
       })
@@ -371,8 +373,11 @@ module.exports = {
   },
 
   updateUserSchedule: (userId, scheduleId, callback) => {
-    UserSchedule.update({ status: 'attending' }, { where: {id_user: userId, id_schedule: scheduleId }})
-      .then((schedule) => {
+    UserSchedule.update(
+      { status: 'attending' },
+      { where: { id_user: userId, id_schedule: scheduleId } }
+    )
+      .then(schedule => {
         callback(null, schedule);
       })
       .catch(err => callback(err));
@@ -405,7 +410,7 @@ module.exports = {
   },
 
   deleteUserSchedule: (uid, sid, callback) => {
-    UserSchedule.find( { where: { id_user: uid, id_schedule: sid} })
+    UserSchedule.find({ where: { id_user: uid, id_schedule: sid } })
       .then(found => {
         return found.destroy().save();
       })
@@ -444,8 +449,19 @@ module.exports = {
       });
   },
 
+  getPhotoByUid: (uid, callback) => {
+    // find one photo where the Photo's id_user === uid... 7 for now
+    Photo.findOne({ where: { id_user: uid } })
+      .then(photo => {
+        callback(null, photo);
+      })
+      .catch(err => {
+        callback(err);
+      });
+  },
+
   addPhoto: (photo, callback) => {
-    Photo.create(photo, { fields: ['url'] })
+    Photo.create(photo, { fields: ['url', 'id_user'] })
       .then(photo => {
         callback(null, photo);
       })
