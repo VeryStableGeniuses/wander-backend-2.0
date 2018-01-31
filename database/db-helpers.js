@@ -450,7 +450,7 @@ module.exports = {
   },
 
   getPhotoByUid: (uid, callback) => {
-    // find one photo where the Photo's id_user === uid... 7 for now
+    // find one photo where the Photo's id_user === uid... 85 for now
     Photo.findOne({
       where: { id_user: uid },
       order: [['createdAt', 'DESC']]
