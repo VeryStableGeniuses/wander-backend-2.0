@@ -164,7 +164,9 @@ app.delete(
   '/user_like',
   passport.authenticate('jwt', { session: false }),
   (req, res) => {
-    let userLike = req.body;
+    let userLike = {};
+    userLike.id_type = parseInt(req.query.id_type);
+    userLike.like = req.query.like;
     userLike.id_user = req.user.id;
     dbConfig.deleteUserLike(userLike, (err, userLike) => {
       if (err) {
