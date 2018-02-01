@@ -403,9 +403,9 @@ app.post(
   }
 );
 
-app.post('/accept_invite', (req, res) => {
+app.post('/accept_invite', passport.authenticate('jwt', { session: false }), (req, res) => {
   // Get the user id from the request. I've used my own as a placeholder
-  const userId = 18;
+  const userId = req.user.id;
   const { scheduleId, accepted } = req.body;
   if (accepted === 'true') {
     dbConfig.updateUserSchedule(userId, scheduleId, (err, response) => {
