@@ -230,9 +230,6 @@ app.get('/schedule/:sid', (req, res) => {
   });
 });
 
-// when you receive schedule, get all events tied to that schedule
-// create Schedule, scheduled events, etc. based on user_likes
-
 app.post('/schedule', (req, res) => {
   const schedule = req.body;
   dbConfig.createSchedule(schedule, (err, newSchedule) => {
