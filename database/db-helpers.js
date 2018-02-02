@@ -215,6 +215,7 @@ module.exports = {
       });
   },
 
+
   updateEvents: (event, callback) => {
     Event.findById(event.id)
       .then(found => {

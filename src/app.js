@@ -301,7 +301,7 @@ function generateEventsForSchedule(dbSchedule, schedule) {
               ? event.location.longitude
               : event.latlng.lng,
             googleId: event.placeId,
-            startTime: event.start
+            startTime: event.startTime
           };
 
           dbConfig.addEvent(eventObj, (err, newEvent) => {
