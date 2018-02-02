@@ -18,7 +18,7 @@ const Event = sequelize.define('event', {
   name: Sequelize.STRING,
   latitude: Sequelize.FLOAT,
   longitude: Sequelize.FLOAT,
-  startTime: Sequelize.INTEGER,
+  startTime: Sequelize.STRING,
   googleId: Sequelize.STRING
 });
 
