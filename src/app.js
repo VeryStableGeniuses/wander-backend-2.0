@@ -27,6 +27,10 @@ app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   dbConfig.getuserByEmail(email, (err, user) => {
+    console.log('user', user);
+    if (!user) {
+      return res.json('User does not exist');
+    }
     const tokenData = {
       id: user.id,
       name: user.name,
@@ -34,9 +38,6 @@ app.post('/login', (req, res) => {
     };
     if (err) {
       throw err;
-    }
-    if (!user) {
-      res.json('User does not exist');
     }
     dbConfig.comparePassword(password, user.password, (err, isMatch) => {
       if (err) {
@@ -301,7 +302,7 @@ function generateEventsForSchedule(dbSchedule, schedule) {
               ? event.location.longitude
               : event.latlng.lng,
             googleId: event.placeId,
-            startTime: event.startTime
+            startTime: event.start
           };
 
           dbConfig.addEvent(eventObj, (err, newEvent) => {
@@ -405,28 +406,32 @@ app.post(
   }
 );
 
-app.post('/accept_invite', passport.authenticate('jwt', { session: false }), (req, res) => {
-  // Get the user id from the request. I've used my own as a placeholder
-  const userId = req.user.id;
-  const { scheduleId, accepted } = req.body;
-  if (accepted === 'true') {
-    dbConfig.updateUserSchedule(userId, scheduleId, (err, response) => {
-      if (err) {
-        res.status(400).send(err);
-      } else {
-        res.status(204).send(response);
-      }
-    });
-  } else {
-    dbConfig.deleteUserSchedule(userId, scheduleId, (err, success) => {
-      if (err) {
-        res.status(400).send(err);
-      } else {
-        res.status(204).send(success);
-      }
-    });
+app.post(
+  '/accept_invite',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    // Get the user id from the request. I've used my own as a placeholder
+    const userId = req.user.id;
+    const { scheduleId, accepted } = req.body;
+    if (accepted === 'true') {
+      dbConfig.updateUserSchedule(userId, scheduleId, (err, response) => {
+        if (err) {
+          res.status(400).send(err);
+        } else {
+          res.status(204).send(response);
+        }
+      });
+    } else {
+      dbConfig.deleteUserSchedule(userId, scheduleId, (err, success) => {
+        if (err) {
+          res.status(400).send(err);
+        } else {
+          res.status(204).send(success);
+        }
+      });
+    }
   }
-});
+);
 
 app.get('/event_schedules', (req, res) => {
   dbConfig.getEventSchedule((err, eventSchedules) => {
@@ -470,39 +475,49 @@ app.get('/photos', (req, res) => {
   });
 });
 
-app.get('/photo', (req, res) => {
-  // let uid = req.user.id;
-  let uid = 85; // just hardcode user id for now
+app.get(
+  '/photo',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    let uid = req.user.id;
+    // let uid = 85; // just hardcode user id for now
 
-  dbConfig.getPhotoByUid(uid, (err, photo) => {
-    if (err) {
-      res.send(err);
-    } else {
-      res.status(200).send(photo);
-    }
-  });
-});
+    dbConfig.getPhotoByUid(uid, (err, photo) => {
+      if (err) {
+        res.send(err);
+      } else {
+        res.status(200).send(photo);
+      }
+    });
+  }
+);
 
-app.post('/photo', (req, res) => {
-  let photo = req.body;
-  // photo.id_user = req.user.id;
-  photo.id_user = 85; // just hardcode user id for now
+app.post(
+  '/photo',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    let photo = req.body;
+    photo.id_user = req.user.id;
+    // photo.id_user = 85; // just hardcode user id for now
 
-  /* photo object will look like:
+    /* photo object will look like:
 	* {
 	*		url: https://aws.blahblah/photo,
 	*	  id_user: 7
 	*	}
 	*/
 
-  dbConfig.addPhoto(photo, (err, newPhoto) => {
-    if (err) {
-      res.send(err);
-    } else {
-      res.status(201).send(newPhoto.dataValues);
-    }
-  });
-});
+    console.log('adding photo', photo);
+
+    dbConfig.addPhoto(photo, (err, newPhoto) => {
+      if (err) {
+        res.send(err);
+      } else {
+        res.status(201).send(newPhoto.dataValues);
+      }
+    });
+  }
+);
 
 // route for handling 404 requests(unavailable routes)
 app.use(function(req, res) {
